@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { TipoSolicitudService } from './tipo-solicitud.service';
 import { CreateTipoSolicitudDto } from './dto/create-tipo-solicitud.dto';
 
@@ -12,8 +12,8 @@ export class TipoSolicitudController {
   }
 
   @Get()
-  obtenerRegistros() {
-    return this.tipoDenunciasService.obtenerRegistros();
+  obtenerRegistros(@Query('lastTimeModified') lastTimeModified: string) {
+    return this.tipoDenunciasService.obtenerRegistros(lastTimeModified);
   }
   //
   // @Get('porDepartamento')

@@ -8,12 +8,6 @@ export class TipoSolicitud {
   @Prop({ required: true })
   id: string;
 
-  // @Prop({ required: true })
-  // color: string;
-
-  // @Prop({ required: true })
-  // departamento: string;
-
   @Prop({ required: true })
   nombre: string;
 
@@ -25,6 +19,12 @@ export class TipoSolicitud {
 
   @Prop({ required: true })
   createdAt: Date;
+
+  @Prop({ required: true })
+  updatedAt: Date;
+
+  @Prop({ required: true })
+  status: string;
 }
 
 export const TipoSolicitudSchema = SchemaFactory.createForClass(TipoSolicitud);
