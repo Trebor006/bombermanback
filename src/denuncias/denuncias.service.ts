@@ -24,8 +24,11 @@ import { ActualizarDepartamentoDenunciaRequestDto } from './dto/actualizar-depar
 import { TokenDispositivo } from '../schemas/tokenDispositivo.schema';
 import { DepartamentosService } from '../configurationsresources/departamentos/departamentos.service';
 import { Departamento } from '../schemas/departamento.schema';
-import { TipoDenuncia } from '../common/dto/tipo-denuncia';
 import { TipoSolicitud } from '../schemas/tipo-solicitud.schema';
+import { SyncFilePartRequestDto } from './dto/sync-filepart.request.dto';
+import { FilePart } from '../schemas/filePart.schema';
+import { VerificadorCorreoDto } from '../generador-codigo/dto/verificador-correo.dto';
+import { JoinFilePartRequestDto } from './dto/join-filepart.request.dto';
 
 @Injectable()
 export class DenunciasService {
@@ -40,6 +43,7 @@ export class DenunciasService {
     private departamentosService: DepartamentosService,
     @InjectModel(Usuario.name) private userModel: Model<Usuario>,
     @InjectModel(Denuncia.name) private denunciaModel: Model<Denuncia>,
+    @InjectModel(FilePart.name) private filePartModel: Model<FilePart>,
     @InjectModel(TokenDispositivo.name)
     private tokenDispositivoModel: Model<TokenDispositivo>,
     @InjectModel(TipoSolicitud.name)
@@ -178,15 +182,10 @@ export class DenunciasService {
     createDenunciaDto: CrearDenunciaRequestDto,
     hash: string,
   ) {
-    const audioUrl = await this.dropboxClientService.subirAudioFile(
-      createDenunciaDto,
-      hash,
-    );
-
-    const imageUrls = await this.dropboxClientService.subirImagenes(
-      createDenunciaDto,
-      hash,
-    );
+    // const imageUrls = await this.dropboxClientService.subirImagenes(
+    //   createDenunciaDto,
+    //   hash,
+    // );
 
     const nuevaDenunciaDto: CrearDenunciaDto = new CrearDenunciaDto();
     nuevaDenunciaDto.hash = hash;
@@ -197,8 +196,8 @@ export class DenunciasService {
     nuevaDenunciaDto.lon = createDenunciaDto.lon;
     nuevaDenunciaDto.lat = createDenunciaDto.lat;
     nuevaDenunciaDto.estado = 'PENDIENTE';
-    nuevaDenunciaDto.audioUrl = audioUrl;
-    nuevaDenunciaDto.imagenesUrls = imageUrls;
+    nuevaDenunciaDto.audioUrl = '';
+    nuevaDenunciaDto.imagenesUrls = [];
     nuevaDenunciaDto.createdAt = new Date();
     nuevaDenunciaDto.comentarios = [];
 
@@ -566,5 +565,52 @@ export class DenunciasService {
     });
 
     return comentarios;
+  }
+
+  async syncFilePart(filePartRequestDto: SyncFilePartRequestDto) {
+    const newFilePart = new this.filePartModel(filePartRequestDto);
+    const filePartSaved = await newFilePart.save();
+
+    return filePartSaved;
+  }
+
+  async joinFilePart(joinFilePartRequestDto: JoinFilePartRequestDto) {
+    const fileParts = await this.filePartModel
+      .find({ requestId: joinFilePartRequestDto.requestId })
+      .sort({ part: 1 })
+      .exec();
+
+    let resultadoConcatenado = '';
+
+    fileParts.forEach((documento) => {
+      resultadoConcatenado += documento.data;
+    });
+
+    const audioUrl = await this.dropboxClientService.subirAudioFile(
+      resultadoConcatenado,
+      joinFilePartRequestDto.requestId,
+    );
+
+    const denuncia = await this.denunciaModel
+      .findOne({ hash: joinFilePartRequestDto.requestId })
+      .exec();
+    if (denuncia == null) {
+      new Error('No existe la denuncia');
+    }
+
+    denuncia.audioUrl = audioUrl;
+    await denuncia.save();
+
+    this.filePartModel
+      .deleteMany({ requestId: joinFilePartRequestDto.requestId })
+      .then(() => {
+        console.log('Documentos eliminados correctamente');
+      })
+      .catch((error) => {
+        // Manejar errores aquí
+        console.error('Error al eliminar documentos:', error);
+      });
+
+    return denuncia;
   }
 }

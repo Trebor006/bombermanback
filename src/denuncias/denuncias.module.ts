@@ -31,6 +31,7 @@ import {
   TokenDispositivo,
   TokenDispositivoSchema,
 } from '../schemas/tokenDispositivo.schema';
+import { FilePart, FilePartSchema } from '../schemas/filePart.schema';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import {
       { name: Denuncia.name, schema: DenunciaSchema },
       { name: TipoSolicitud.name, schema: TipoSolicitudSchema },
       { name: Departamento.name, schema: DepartamentoSchema },
+      { name: FilePart.name, schema: FilePartSchema },
     ]),
   ],
   controllers: [DenunciasController],

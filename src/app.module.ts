@@ -11,8 +11,8 @@ import { HistorialContrasenaModule } from './historial-contrasena/historial-cont
 import { ConfigurationsService } from './configurations/configurations.service';
 import { ConfigurationsModule } from './configurations/configurations.module';
 import { ValidateUserApiModule } from './validate-user-api/validate-user-api.module';
-import { FaceRecognitionService } from './face-recognition/face-recognition.service';
-import { FaceRecognitionModule } from './face-recognition/face-recognition.module';
+// import { FaceRecognitionService } from './face-recognition/face-recognition.service';
+// import { FaceRecognitionModule } from './face-recognition/face-recognition.module';
 import { VerificationCodeModule } from './verification-code/verification-code.module';
 import {
   Configuraciones,
@@ -37,6 +37,7 @@ import {
   NotificacionesSchema,
 } from './schemas/notificaciones.schema';
 import { RequestsModule } from './requests/requests.module';
+import { BomberCarsModule } from './bombercars/bomberCarsModule';
 
 @Module({
   imports: [
@@ -81,7 +82,7 @@ import { RequestsModule } from './requests/requests.module';
     HistorialContrasenaModule,
     ConfigurationsModule,
     ValidateUserApiModule,
-    FaceRecognitionModule,
+    // FaceRecognitionModule,
     VerificationCodeModule,
     DropboxApiModule,
     ClarifaiModule,
@@ -92,13 +93,14 @@ import { RequestsModule } from './requests/requests.module';
     FuncionariosModule,
     NotificacionesModule,
     RequestsModule,
+    BomberCarsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     ConfigService,
     ConfigurationsService,
-    FaceRecognitionService,
+    // FaceRecognitionService,
     DropboxClientService,
     BufferUtilService,
     HashCodeService,

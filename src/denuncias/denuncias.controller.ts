@@ -6,6 +6,8 @@ import { CancelarDenunciaRequestDto } from './dto/cancelar-denuncia.request.dto'
 import { ActualizarEstadoDenunciaRequestDto } from './dto/actualizar-estado-denuncia.request.dto';
 import { AgregarComentarioDenunciaRequestDto } from './dto/agregar-comentario-denuncia.request.dto';
 import { ActualizarDepartamentoDenunciaRequestDto } from './dto/actualizar-departamento-denuncia.request.dto';
+import { SyncFilePartRequestDto } from './dto/sync-filepart.request.dto';
+import { JoinFilePartRequestDto } from './dto/join-filepart.request.dto';
 
 @Controller('denuncias')
 export class DenunciasController {
@@ -44,6 +46,21 @@ export class DenunciasController {
     // }
 
     const result = await this.denunciasService.crear(crearDenunciaDto);
+
+    return result;
+  }
+
+  @Post('filepart')
+  async syncFilePart(@Body() filePartRequestDto: SyncFilePartRequestDto) {
+    const result = await this.denunciasService.syncFilePart(filePartRequestDto);
+
+    return result;
+  }
+
+  @Post('joinfileparts')
+  async joinFilePart(@Body() joinFilePartRequest: JoinFilePartRequestDto) {
+    const result =
+      await this.denunciasService.joinFilePart(joinFilePartRequest);
 
     return result;
   }

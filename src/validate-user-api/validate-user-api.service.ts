@@ -4,15 +4,12 @@ import axios from 'axios';
 import { ValidationRequest } from './dto/validation-request.dto';
 import { PersonDto } from './dto/person.dto';
 import { SegipResponseDto } from './dto/segip-response.dto';
-import { FaceRecognitionService } from '../face-recognition/face-recognition.service';
+// import { FaceRecognitionService } from '../face-recognition/face-recognition.service';
 import { UserDto } from '../common/dto/user.dto';
 
 @Injectable()
 export class ValidateUserApiService {
-  constructor(
-    private configService: ConfigService,
-    private faceRecognitionService: FaceRecognitionService,
-  ) {}
+  constructor(private configService: ConfigService) {}
 
   async obtenerRegistroDeSegip(ci: string) {
     const SEGIP_URL = this.configService.get<string>('SEGIP_URL');
@@ -51,15 +48,15 @@ export class ValidateUserApiService {
         person.identification,
     );
 
-    const validUser =
-      await this.faceRecognitionService.validarUsuarioBiometricamente(
-        person.photo,
-        validationRequest.photo,
-      );
-
-    if (!validUser) {
-      return null;
-    }
+    // const validUser =
+    //   await this.faceRecognitionService.validarUsuarioBiometricamente(
+    //     person.photo,
+    //     validationRequest.photo,
+    //   );
+    //
+    // if (!validUser) {
+    //   return null;
+    // }
 
     const userDto: UserDto = {
       nombre: person.name,

@@ -111,10 +111,7 @@ export class DropboxClientService {
     }
   }
 
-  async subirAudioFile(
-    createDenunciaDto: CrearDenunciaRequestDto,
-    hash: string,
-  ) {
+  async subirAudioFile(audioContent: string, hash: string) {
     const folderDenuncias = this.configService.get<string>(
       'DROPBOX_FOLDER_DENUNCIAS',
     );
@@ -125,8 +122,8 @@ export class DropboxClientService {
     }
 
     const url = await this.subirArchivoBase64(
-      createDenunciaDto.audio,
-      this.hashCodeService.generarHashCode(createDenunciaDto.audio) + '.mp3',
+      audioContent,
+      this.hashCodeService.generarHashCode(audioContent) + '.mp3',
       hash,
     );
     console.log('image url: ' + url);
