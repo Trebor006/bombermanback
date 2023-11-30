@@ -7,7 +7,7 @@ export type BomberCarPositionHistoryDocument =
 @Schema()
 export class BomberCarPositionHistory {
   @Prop({ required: true })
-  ambulanciaId: string;
+  bomberCarId: string;
 
   @Prop({ required: true })
   lon: number;

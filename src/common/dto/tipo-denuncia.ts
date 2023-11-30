@@ -1,4 +1,4 @@
-export class TipoDenuncia {
+export class TipoEmergencia {
   tipo: string;
   color: string;
 }

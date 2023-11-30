@@ -1,10 +1,10 @@
-export class CrearDenunciaRequestDto {
+export class CrearEmergenciaRequestDto {
   usuario: string;
 
   titulo: string;
   descripcion: string;
 
-  tipoDenuncia: string;
+  tipoEmergencia: string;
   lon: string;
   lat: string;
   audio: string;

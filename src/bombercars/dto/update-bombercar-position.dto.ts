@@ -1,5 +1,5 @@
 export class UpdateBombercarPositionDto {
-  ambulanciaId: string;
+  bomberCarId: string;
   lon: number;
   lat: number;
 

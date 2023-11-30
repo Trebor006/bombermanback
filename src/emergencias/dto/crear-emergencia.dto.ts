@@ -1,6 +1,6 @@
 import { ComentarioDto } from '../../common/dto/comentario-dto';
 
-export class CrearDenunciaDto {
+export class CrearEmergenciaDto {
   hash: string;
   correo: string;
 
@@ -9,7 +9,7 @@ export class CrearDenunciaDto {
   lon: string;
   lat: string;
 
-  tipoDenuncia: string;
+  tipoEmergencia: string;
   imagenesUrls: string[];
   createdAt: Date;
   estado: string;

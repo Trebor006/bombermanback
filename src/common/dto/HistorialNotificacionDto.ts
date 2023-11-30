@@ -2,7 +2,7 @@ import { NotificationDto } from './notificacion-dto';
 
 export class HistorialNotificacionDto {
   usuario: string;
-  idDenuncia: string;
+  idEmergencia: string;
   notification: NotificationDto;
   data?: {
     [key: string]: string;

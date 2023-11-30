@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Dropbox } from 'dropbox';
 import { ConfigService } from '@nestjs/config';
 import { BufferUtilService } from '../../common/utils/buffer-util/buffer-util.service';
-import { CrearDenunciaRequestDto } from '../../denuncias/dto/crear-denuncia.request.dto';
+import { CrearEmergenciaRequestDto } from '../../emergencias/dto/crear-emergencia.request.dto';
 import { HashCodeService } from '../../common/utils/hash-code/hash-code.service';
 
 @Injectable()
@@ -26,20 +26,20 @@ export class DropboxClientService {
   }
 
   async subirImagenes(
-    createDenunciaDto: CrearDenunciaRequestDto,
+    createEmergenciaDto: CrearEmergenciaRequestDto,
     hash: string,
   ) {
-    const folderDenuncias = this.configService.get<string>(
-      'DROPBOX_FOLDER_DENUNCIAS',
+    const folderEmergencias = this.configService.get<string>(
+      'DROPBOX_FOLDER_EMERGENCIAS',
     );
-    const folderName = this.BASE_URL + folderDenuncias + '/' + hash;
+    const folderName = this.BASE_URL + folderEmergencias + '/' + hash;
     const existeFolder = await this.verificarFolder(folderName);
     if (!existeFolder) {
       await this.crearFolder(folderName);
     }
 
     const urlImagenes: string[] = await Promise.all(
-      createDenunciaDto.imagenesList.map(async (imagen) => {
+      createEmergenciaDto.imagenesList.map(async (imagen) => {
         const url = await this.subirArchivoBase64(
           imagen,
           this.hashCodeService.generarHashCode(imagen) + '.jpg',
@@ -75,10 +75,10 @@ export class DropboxClientService {
     photoName: string,
     contents: Buffer,
   ): Promise<string> {
-    const folderDenuncias = this.configService.get<string>(
-      'DROPBOX_FOLDER_DENUNCIAS',
+    const folderEmergencias = this.configService.get<string>(
+      'DROPBOX_FOLDER_EMERGENCIAS',
     );
-    const folderName = this.BASE_URL + folderDenuncias + '/' + folder;
+    const folderName = this.BASE_URL + folderEmergencias + '/' + folder;
     const existeFolder = await this.verificarFolder(folderName);
     if (!existeFolder) {
       await this.crearFolder(folderName);
@@ -112,10 +112,10 @@ export class DropboxClientService {
   }
 
   async subirAudioFile(audioContent: string, hash: string) {
-    const folderDenuncias = this.configService.get<string>(
-      'DROPBOX_FOLDER_DENUNCIAS',
+    const folderEmergencias = this.configService.get<string>(
+      'DROPBOX_FOLDER_EMERGENCIAS',
     );
-    const folderName = this.BASE_URL + folderDenuncias + '/' + hash;
+    const folderName = this.BASE_URL + folderEmergencias + '/' + hash;
     const existeFolder = await this.verificarFolder(folderName);
     if (!existeFolder) {
       await this.crearFolder(folderName);

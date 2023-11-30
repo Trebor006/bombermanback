@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CrearDenunciaRequestDto } from './dto/crear-denuncia.request.dto';
+import { CrearEmergenciaRequestDto } from './dto/crear-emergencia.request.dto';
 
 @Injectable()
-export class DenunciasValidatorService {
-  validarDTO(dto: CrearDenunciaRequestDto): string[] {
+export class EmergenciasValidatorService {
+  validarDTO(dto: CrearEmergenciaRequestDto): string[] {
     const errores: string[] = [];
 
     // Validación del campo "descripcion"

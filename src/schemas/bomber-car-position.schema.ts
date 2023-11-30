@@ -6,7 +6,7 @@ export type BomberCarPositionDocument = HydratedDocument<BomberCarPosition>;
 @Schema()
 export class BomberCarPosition {
   @Prop({ required: true })
-  ambulanciaId: string;
+  bomberCarId: string;
 
   @Prop({ required: true })
   lon: number;

@@ -12,7 +12,7 @@ import {
   BomberCarPositionHistory,
   BomberCarPositionHistorySchema,
 } from '../schemas/bomber-car-position-history.schema';
-import { PromptsService } from '../denuncias/prompts.service';
+import { PromptsService } from '../emergencias/prompts.service';
 import { OpenaiService } from '../components/openai/openai.service';
 
 @Module({

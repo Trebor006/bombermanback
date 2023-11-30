@@ -10,7 +10,7 @@ export class Notificaciones {
   usuario: string;
 
   @Prop({ required: true })
-  idDenuncia: string;
+  idEmergencia: string;
 
   @Prop({ required: true })
   notification: NotificationDto;

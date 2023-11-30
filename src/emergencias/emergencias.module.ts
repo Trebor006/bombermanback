@@ -1,21 +1,21 @@
 import { Module } from '@nestjs/common';
-import { DenunciasService } from './denuncias.service';
-import { DenunciasController } from './denuncias.controller';
+import { EmergenciasService } from './emergencias.service';
+import { EmergenciasController } from './emergencias.controller';
 import { OpenaiService } from '../components/openai/openai.service';
 import { DropboxClientService } from '../components/dropbox-client/dropbox-client.service';
 import { ClarifaiService } from '../components/clarifai/clarifai.service';
 import { ConfigService } from '@nestjs/config';
 import { PromptsService } from './prompts.service';
-import { DenunciasValidatorService } from './denuncias.validator.service';
+import { EmergenciasValidatorService } from './emergencias.validator.service';
 import { BufferUtilService } from '../common/utils/buffer-util/buffer-util.service';
 import { HashCodeService } from '../common/utils/hash-code/hash-code.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Denuncia, DenunciaSchema } from '../schemas/denuncia.schema';
-import { TipoSolicitudService } from '../configurationsresources/tipo-solicitudes/tipo-solicitud.service';
+import { Emergencia, EmergenciaSchema } from '../schemas/emergenciaSchema';
+import { TipoEmergenciaService } from '../configurationsresources/tipo-emergencias/tipo-emergencia.service';
 import {
-  TipoSolicitud,
-  TipoSolicitudSchema,
-} from '../schemas/tipo-solicitud.schema';
+  TipoEmergencia,
+  TipoEmergenciaSchema,
+} from '../schemas/tipo-emergencia.schema';
 import {
   Departamento,
   DepartamentoSchema,
@@ -39,16 +39,16 @@ import { FilePart, FilePartSchema } from '../schemas/filePart.schema';
       { name: Usuario.name, schema: UsuarioSchema },
       { name: Notificaciones.name, schema: NotificacionesSchema },
       { name: TokenDispositivo.name, schema: TokenDispositivoSchema },
-      { name: Denuncia.name, schema: DenunciaSchema },
-      { name: TipoSolicitud.name, schema: TipoSolicitudSchema },
+      { name: Emergencia.name, schema: EmergenciaSchema },
+      { name: TipoEmergencia.name, schema: TipoEmergenciaSchema },
       { name: Departamento.name, schema: DepartamentoSchema },
       { name: FilePart.name, schema: FilePartSchema },
     ]),
   ],
-  controllers: [DenunciasController],
+  controllers: [EmergenciasController],
   providers: [
-    DenunciasService,
-    DenunciasValidatorService,
+    EmergenciasService,
+    EmergenciasValidatorService,
     PromptsService,
     OpenaiService,
     DropboxClientService,
@@ -56,9 +56,9 @@ import { FilePart, FilePartSchema } from '../schemas/filePart.schema';
     ConfigService,
     BufferUtilService,
     HashCodeService,
-    TipoSolicitudService,
+    TipoEmergenciaService,
     DepartamentosService,
     NotificacionesService,
   ],
 })
-export class DenunciasModule {}
+export class EmergenciasModule {}

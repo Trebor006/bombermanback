@@ -7,7 +7,7 @@ import { BomberCar } from '../schemas/bomberCarSchema';
 import { UpdateBombercarPositionDto } from './dto/update-bombercar-position.dto';
 import { BomberCarPosition } from '../schemas/bomber-car-position.schema';
 import { BomberCarPositionHistory } from '../schemas/bomber-car-position-history.schema';
-import { PromptsService } from '../denuncias/prompts.service';
+import { PromptsService } from '../emergencias/prompts.service';
 import { OpenaiService } from '../components/openai/openai.service';
 
 @Injectable()
@@ -16,61 +16,60 @@ export class BomberCarsService {
     private hashCodeService: HashCodeService,
     private promptsService: PromptsService,
     private openaiService: OpenaiService,
-    @InjectModel(BomberCar.name) private ambulanciaModel: Model<BomberCar>,
+    @InjectModel(BomberCar.name) private bomberCarModel: Model<BomberCar>,
     @InjectModel(BomberCarPosition.name)
-    private ambulanciaPositionModel: Model<BomberCarPosition>,
+    private bomberCarPositionModel: Model<BomberCarPosition>,
     @InjectModel(BomberCarPositionHistory.name)
-    private AmbulanciaPositionHistoryModel: Model<BomberCarPositionHistory>,
+    private BomberCarPositionHistoryModel: Model<BomberCarPositionHistory>,
   ) {}
 
-  async create(createAmbulanciaDto: CreateBombercarDto) {
-    createAmbulanciaDto.createdAt = new Date();
-    createAmbulanciaDto.id =
-      this.hashCodeService.generarHashCode(createAmbulanciaDto);
+  async create(createBomberCarDto: CreateBombercarDto) {
+    createBomberCarDto.createdAt = new Date();
+    createBomberCarDto.id =
+      this.hashCodeService.generarHashCode(createBomberCarDto);
 
-    const newAmbulancia = new this.ambulanciaModel(createAmbulanciaDto);
-    const ambulanciaSaved = await newAmbulancia.save();
+    const newBomberCar = new this.bomberCarModel(createBomberCarDto);
+    const bomberCarSaved = await newBomberCar.save();
 
-    return ambulanciaSaved;
+    return bomberCarSaved;
   }
 
   async updateposition(
-    updateAmbulanciaUbicacionDto: UpdateBombercarPositionDto,
+    updateBomberCarUbicacionDto: UpdateBombercarPositionDto,
   ) {
-    this.moveToHistoryAndDelete(updateAmbulanciaUbicacionDto.ambulanciaId);
+    this.moveToHistoryAndDelete(updateBomberCarUbicacionDto.bomberCarId);
 
-    updateAmbulanciaUbicacionDto.createdAt = new Date();
-    const newAmbulanciaPosition = new this.ambulanciaPositionModel(
-      updateAmbulanciaUbicacionDto,
+    updateBomberCarUbicacionDto.createdAt = new Date();
+    const newBomberCarPosition = new this.bomberCarPositionModel(
+      updateBomberCarUbicacionDto,
     );
-    const ambulanciaPositionSaved = await newAmbulanciaPosition.save();
+    const bomberCarPositionSaved = await newBomberCarPosition.save();
 
-    return ambulanciaPositionSaved;
+    return bomberCarPositionSaved;
   }
 
-  async moveToHistoryAndDelete(ambulanciaId: string) {
+  async moveToHistoryAndDelete(bomberCarId: string) {
     try {
-      // Buscar el documento actual en ambulanciaPositionModel por ambulanciaId
-      const currentAmbulanciaPosition =
-        await this.ambulanciaPositionModel.findOne({ ambulanciaId });
+      // Buscar el documento actual en bomberCarPositionModel por bomberCarId
+      const currentBomberCarPosition =
+        await this.bomberCarPositionModel.findOne({ bomberCarId });
 
-      if (currentAmbulanciaPosition) {
-        // Crear un nuevo documento en AmbulanciaPositionHistory con los datos del documento actual
-        const ambulanciaPositionHistory =
-          new this.AmbulanciaPositionHistoryModel(
-            currentAmbulanciaPosition.toObject(),
-          );
+      if (currentBomberCarPosition) {
+        // Crear un nuevo documento en BomberCarPositionHistory con los datos del documento actual
+        const bomberCarPositionHistory = new this.BomberCarPositionHistoryModel(
+          currentBomberCarPosition.toObject(),
+        );
 
-        // Guardar el nuevo documento en AmbulanciaPositionHistory
-        await ambulanciaPositionHistory.save();
+        // Guardar el nuevo documento en BomberCarPositionHistory
+        await bomberCarPositionHistory.save();
 
-        // Eliminar el documento actual en ambulanciaPositionModel
-        await this.ambulanciaPositionModel.deleteOne({ ambulanciaId });
+        // Eliminar el documento actual en bomberCarPositionModel
+        await this.bomberCarPositionModel.deleteOne({ bomberCarId });
 
-        return ambulanciaPositionHistory; // Devolver el documento copiado a AmbulanciaPositionHistory
+        return bomberCarPositionHistory; // Devolver el documento copiado a BomberCarPositionHistory
       } else {
         throw new Error(
-          `No se encontró ninguna ubicación para la ambulancia con ID: ${ambulanciaId}`,
+          `No se encontró ninguna ubicación para la bomberCar con ID: ${bomberCarId}`,
         );
       }
     } catch (error) {
@@ -81,35 +80,35 @@ export class BomberCarsService {
   }
 
   async obtenerSugerencia() {
-    const currentPositions = await this.ambulanciaPositionModel.find();
+    const currentPositions = await this.bomberCarPositionModel.find();
 
-    const parsedList = this.parsearAmbulancias(currentPositions);
+    const parsedList = this.parsearBomberCars(currentPositions);
 
-    this.verificarImagenCorrespondeTipoDenuncia(parsedList, {
+    this.verificarImagenCorrespondeTipoEmergencia(parsedList, {
       lat: -17.344215,
       lon: -63.358794,
     });
   }
 
-  parsearAmbulancias(ambulancias: BomberCarPosition[]): [] {
+  parsearBomberCars(bomberCars: BomberCarPosition[]): [] {
     const parsedData = [];
 
-    for (const ambulancia of ambulancias) {
-      const parsedAmbulancia = {
-        id: ambulancia.ambulanciaId,
+    for (const bomberCar of bomberCars) {
+      const parsedBomberCar = {
+        id: bomberCar.bomberCarId,
         position: {
-          lat: ambulancia.lat,
-          lon: ambulancia.lon,
+          lat: bomberCar.lat,
+          lon: bomberCar.lon,
         },
       };
-      parsedData.push(parsedAmbulancia);
+      parsedData.push(parsedBomberCar);
     }
 
     // @ts-ignore
     return parsedData;
   }
 
-  private async verificarImagenCorrespondeTipoDenuncia(
+  private async verificarImagenCorrespondeTipoEmergencia(
     posiciones: any,
     ubicacionBuscada: any,
   ) {

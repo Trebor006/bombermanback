@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { TipoSolicitudService } from './tipo-solicitud.service';
-import { TipoSolicitudController } from './tipo-solicitud.controller';
+import { TipoEmergenciaService } from './tipo-emergencia.service';
+import { TipoEmergenciaController } from './tipo-emergencia.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { HashCodeService } from '../../common/utils/hash-code/hash-code.service';
 import {
-  TipoSolicitud,
-  TipoSolicitudSchema,
-} from '../../schemas/tipo-solicitud.schema';
+  TipoEmergencia,
+  TipoEmergenciaSchema,
+} from '../../schemas/tipo-emergencia.schema';
 import { DepartamentosService } from '../departamentos/departamentos.service';
 import {
   Departamento,
@@ -16,11 +16,11 @@ import {
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: TipoSolicitud.name, schema: TipoSolicitudSchema },
+      { name: TipoEmergencia.name, schema: TipoEmergenciaSchema },
       { name: Departamento.name, schema: DepartamentoSchema },
     ]),
   ],
-  controllers: [TipoSolicitudController],
-  providers: [TipoSolicitudService, DepartamentosService, HashCodeService],
+  controllers: [TipoEmergenciaController],
+  providers: [TipoEmergenciaService, DepartamentosService, HashCodeService],
 })
-export class TipoSolicitudModule {}
+export class TipoEmergenciaModule {}

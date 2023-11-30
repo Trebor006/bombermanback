@@ -1,9 +1,9 @@
-export class DenunciaDto {
+export class EmergenciaDto {
   _id: string;
   correo: string;
   titulo: string;
   descripcion: string;
-  tipoDenuncia: string;
+  tipoEmergencia: string;
   colorMarker: string;
   estado: string;
   imagenesUrls: string[];

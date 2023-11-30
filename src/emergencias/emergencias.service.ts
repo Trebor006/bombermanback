@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CrearDenunciaRequestDto } from './dto/crear-denuncia.request.dto';
+import { CrearEmergenciaRequestDto } from './dto/crear-emergencia.request.dto';
 import { OpenaiService } from '../components/openai/openai.service';
 import { DropboxClientService } from '../components/dropbox-client/dropbox-client.service';
 import { ClarifaiService } from '../components/clarifai/clarifai.service';
@@ -7,56 +7,56 @@ import { PromptsService } from './prompts.service';
 import { HashCodeService } from '../common/utils/hash-code/hash-code.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Denuncia } from '../schemas/denuncia.schema';
-import { CrearDenunciaDto } from './dto/crear-denuncia.dto';
-import { CancelarDenunciaRequestDto } from './dto/cancelar-denuncia.request.dto';
+import { Emergencia } from '../schemas/emergenciaSchema';
+import { CrearEmergenciaDto } from './dto/crear-emergencia.dto';
+import { CancelarEmergenciaRequestDto } from './dto/cancelar-emergencia.request.dto';
 import { ErrorResponse } from '../common/dto/base/error-response.dto';
 import { ErrorCodes } from '../common/dto/base/ErrorCodes';
 import { BaseResponse } from '../common/dto/base/base-response.dto';
-import { DenunciaDto } from '../common/dto/denuncia-dto';
-import { TipoSolicitudService } from '../configurationsresources/tipo-solicitudes/tipo-solicitud.service';
+import { EmergenciaDto } from '../common/dto/emergencia-dto';
+import { TipoEmergenciaService } from '../configurationsresources/tipo-emergencias/tipo-emergencia.service';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
-import { ActualizarEstadoDenunciaRequestDto } from './dto/actualizar-estado-denuncia.request.dto';
+import { ActualizarEstadoEmergenciaRequestDto } from './dto/actualizar-estado-emergencia.request.dto';
 import { Usuario } from '../schemas/usuario.schema';
-import { AgregarComentarioDenunciaRequestDto } from './dto/agregar-comentario-denuncia.request.dto';
+import { AgregarComentarioEmergenciaRequestDto } from './dto/agregar-comentario-emergencia.request.dto';
 import { ComentarioDto } from '../common/dto/comentario-dto';
-import { ActualizarDepartamentoDenunciaRequestDto } from './dto/actualizar-departamento-denuncia.request.dto';
+import { ActualizarDepartamentoEmergenciaRequestDto } from './dto/actualizar-departamento-emergencia.request.dto';
 import { TokenDispositivo } from '../schemas/tokenDispositivo.schema';
 import { DepartamentosService } from '../configurationsresources/departamentos/departamentos.service';
 import { Departamento } from '../schemas/departamento.schema';
-import { TipoSolicitud } from '../schemas/tipo-solicitud.schema';
+import { TipoEmergencia } from '../schemas/tipo-emergencia.schema';
 import { SyncFilePartRequestDto } from './dto/sync-filepart.request.dto';
 import { FilePart } from '../schemas/filePart.schema';
 import { VerificadorCorreoDto } from '../generador-codigo/dto/verificador-correo.dto';
 import { JoinFilePartRequestDto } from './dto/join-filepart.request.dto';
 
 @Injectable()
-export class DenunciasService {
+export class EmergenciasService {
   constructor(
     private hashCodeService: HashCodeService,
     private clarifaiService: ClarifaiService,
     private promptsService: PromptsService,
     private openaiService: OpenaiService,
     private dropboxClientService: DropboxClientService,
-    private tipoSolicitudService: TipoSolicitudService,
+    private tipoSolicitudService: TipoEmergenciaService,
     private notificacionesService: NotificacionesService,
     private departamentosService: DepartamentosService,
     @InjectModel(Usuario.name) private userModel: Model<Usuario>,
-    @InjectModel(Denuncia.name) private denunciaModel: Model<Denuncia>,
+    @InjectModel(Emergencia.name) private emergenciaModel: Model<Emergencia>,
     @InjectModel(FilePart.name) private filePartModel: Model<FilePart>,
     @InjectModel(TokenDispositivo.name)
     private tokenDispositivoModel: Model<TokenDispositivo>,
-    @InjectModel(TipoSolicitud.name)
-    private tipoDenunciaModel: Model<TipoSolicitud>,
+    @InjectModel(TipoEmergencia.name)
+    private tipoEmergenciaModel: Model<TipoEmergencia>,
   ) {}
 
-  async crear(createDenunciaDto: CrearDenunciaRequestDto) {
+  async crear(createEmergenciaDto: CrearEmergenciaRequestDto) {
     const errors: ErrorResponse[] = [];
 
     const hashGenerated: string =
-      this.hashCodeService.generarHashCode(createDenunciaDto);
+      this.hashCodeService.generarHashCode(createEmergenciaDto);
     const permitirRegistro: boolean = await this.permitirRegistroPorHash(
-      createDenunciaDto.usuario,
+      createEmergenciaDto.usuario,
       hashGenerated,
     );
     if (!permitirRegistro) {
@@ -64,50 +64,50 @@ export class DenunciasService {
       errors.push(
         ErrorResponse.generateError(
           ErrorCodes.ERROR_DENUNCIA_DUPLICADA,
-          'La denuncia ya se ha registrado',
+          'La emergencia ya se ha registrado',
         ),
       );
     }
 
     if (errors.length > 0) {
       return BaseResponse.generateError(
-        'Error al registrar la denuncia',
+        'Error al registrar la emergencia',
         errors,
       );
     }
 
-    const denunciaRegistrada = await this.procederRegistroDenuncia(
-      createDenunciaDto,
+    const emergenciaRegistrada = await this.procederRegistroEmergencia(
+      createEmergenciaDto,
       hashGenerated,
     );
 
     return BaseResponse.generateOkResponse(
-      'Denuncia registrada satisfactoriamente',
-      denunciaRegistrada,
+      'Emergencia registrada satisfactoriamente',
+      emergenciaRegistrada,
     );
   }
 
-  async cancelar(cancelarDenunciaRequestDto: CancelarDenunciaRequestDto) {
-    const denuncia = await this.denunciaModel
+  async cancelar(cancelarEmergenciaRequestDto: CancelarEmergenciaRequestDto) {
+    const emergencia = await this.emergenciaModel
       .findOne({
-        correo: cancelarDenunciaRequestDto.usuario,
-        hash: cancelarDenunciaRequestDto.hash,
+        correo: cancelarEmergenciaRequestDto.usuario,
+        hash: cancelarEmergenciaRequestDto.hash,
       })
       .exec();
 
-    if (denuncia.estado !== 'PENDIENTE') {
+    if (emergencia.estado !== 'PENDIENTE') {
       console.log('No se puede cancelar por el estado');
       return Error('No se puede cancelar por el estado');
     }
 
-    denuncia.estado = 'CANCELADO';
-    await denuncia.save();
+    emergencia.estado = 'CANCELADO';
+    await emergencia.save();
 
     return true;
   }
 
-  private async validarMaximoDenuncias(
-    createDenunciaDto: CrearDenunciaRequestDto,
+  private async validarMaximoEmergencias(
+    createEmergenciaDto: CrearEmergenciaRequestDto,
   ) {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set the time to midnight for comparison
@@ -115,10 +115,10 @@ export class DenunciasService {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1); // Get the date for tomorrow
 
-    const denunciasPorTipo = await this.denunciaModel
+    const emergenciasPorTipo = await this.emergenciaModel
       .find({
-        correo: createDenunciaDto.usuario,
-        tipoDenuncia: createDenunciaDto.tipoDenuncia,
+        correo: createEmergenciaDto.usuario,
+        tipoEmergencia: createEmergenciaDto.tipoEmergencia,
         estado: { $ne: 'CANCELADO' },
         createdAt: {
           $gte: today,
@@ -127,27 +127,27 @@ export class DenunciasService {
       })
       .exec();
 
-    return denunciasPorTipo.length < 2;
+    return emergenciasPorTipo.length < 2;
   }
 
   private async permitirRegistroPorHash(usuario: string, hash: string) {
-    const denunciasHash = await this.denunciaModel
+    const emergenciasHash = await this.emergenciaModel
       .find({
         correo: usuario,
         hash: hash,
       })
       .exec();
 
-    return denunciasHash.length == 0;
+    return emergenciasHash.length == 0;
   }
 
-  // private async verificarImagenesCorrespondeTipoDenuncia(
-  //   createDenunciaDto: CrearDenunciaRequestDto,
+  // private async verificarImagenesCorrespondeTipoEmergencia(
+  //   createEmergenciaDto: CrearEmergenciaRequestDto,
   // ): Promise<boolean> {
   //   const resultados: boolean[] = await Promise.all(
-  //     createDenunciaDto.imagenesList.map((imagen) => {
-  //       return this.verificarImagenCorrespondeTipoDenuncia(
-  //         createDenunciaDto.tipoDenuncia,
+  //     createEmergenciaDto.imagenesList.map((imagen) => {
+  //       return this.verificarImagenCorrespondeTipoEmergencia(
+  //         createEmergenciaDto.tipoEmergencia,
   //         imagen,
   //       );
   //     }),
@@ -156,8 +156,8 @@ export class DenunciasService {
   //   return resultados.every((resultado) => resultado);
   // }
 
-  private async verificarImagenCorrespondeTipoDenuncia(
-    tipoDenuncia: string,
+  private async verificarImagenCorrespondeTipoEmergencia(
+    tipoEmergencia: string,
     imagenPrueba: string,
   ) {
     const detalleImagen =
@@ -166,7 +166,7 @@ export class DenunciasService {
       this.promptsService.getPromptByCode('VERIFICACION_CONTENIDO_IMAGEN');
 
     const promptVerificacionImagen = promptVerificacionContenidoImagen
-      .replace('{0}', tipoDenuncia)
+      .replace('{0}', tipoEmergencia)
       .replace('{1}', detalleImagen);
 
     const resultadoVerificacionImagen: boolean = JSON.parse(
@@ -178,51 +178,51 @@ export class DenunciasService {
     return resultadoVerificacionImagen;
   }
 
-  private async procederRegistroDenuncia(
-    createDenunciaDto: CrearDenunciaRequestDto,
+  private async procederRegistroEmergencia(
+    createEmergenciaDto: CrearEmergenciaRequestDto,
     hash: string,
   ) {
     // const imageUrls = await this.dropboxClientService.subirImagenes(
-    //   createDenunciaDto,
+    //   createEmergenciaDto,
     //   hash,
     // );
 
-    const nuevaDenunciaDto: CrearDenunciaDto = new CrearDenunciaDto();
-    nuevaDenunciaDto.hash = hash;
-    nuevaDenunciaDto.correo = createDenunciaDto.usuario;
-    nuevaDenunciaDto.titulo = createDenunciaDto.titulo;
-    nuevaDenunciaDto.descripcion = createDenunciaDto.descripcion;
-    nuevaDenunciaDto.tipoDenuncia = createDenunciaDto.tipoDenuncia;
-    nuevaDenunciaDto.lon = createDenunciaDto.lon;
-    nuevaDenunciaDto.lat = createDenunciaDto.lat;
-    nuevaDenunciaDto.estado = 'PENDIENTE';
-    nuevaDenunciaDto.audioUrl = '';
-    nuevaDenunciaDto.imagenesUrls = [];
-    nuevaDenunciaDto.createdAt = new Date();
-    nuevaDenunciaDto.comentarios = [];
+    const nuevaEmergenciaDto: CrearEmergenciaDto = new CrearEmergenciaDto();
+    nuevaEmergenciaDto.hash = hash;
+    nuevaEmergenciaDto.correo = createEmergenciaDto.usuario;
+    nuevaEmergenciaDto.titulo = createEmergenciaDto.titulo;
+    nuevaEmergenciaDto.descripcion = createEmergenciaDto.descripcion;
+    nuevaEmergenciaDto.tipoEmergencia = createEmergenciaDto.tipoEmergencia;
+    nuevaEmergenciaDto.lon = createEmergenciaDto.lon;
+    nuevaEmergenciaDto.lat = createEmergenciaDto.lat;
+    nuevaEmergenciaDto.estado = 'PENDIENTE';
+    nuevaEmergenciaDto.audioUrl = '';
+    nuevaEmergenciaDto.imagenesUrls = [];
+    nuevaEmergenciaDto.createdAt = new Date();
+    nuevaEmergenciaDto.comentarios = [];
 
-    const model = new this.denunciaModel(nuevaDenunciaDto);
-    const denunciaAlmacenada = await model.save();
+    const model = new this.emergenciaModel(nuevaEmergenciaDto);
+    const emergenciaAlmacenada = await model.save();
 
-    return denunciaAlmacenada;
+    return emergenciaAlmacenada;
   }
 
-  async obtenerListaDenuncias(usuario: string) {
-    const denunciasPorUsuario = await this.denunciaModel
+  async obtenerListaEmergencias(usuario: string) {
+    const emergenciasPorUsuario = await this.emergenciaModel
       .find({
         correo: usuario,
       })
       .exec();
 
-    return denunciasPorUsuario;
+    return emergenciasPorUsuario;
   }
 
-  async obtenerListaDenunciasPorTipo() {
-    const denunciasPorTipo = await this.denunciaModel
+  async obtenerListaEmergenciasPorTipo() {
+    const emergenciasPorTipo = await this.emergenciaModel
       .aggregate([
         {
           $group: {
-            _id: '$tipoDenuncia',
+            _id: '$tipoEmergencia',
             total: { $sum: 1 },
             aceptadas: {
               $sum: { $cond: [{ $eq: ['$estado', 'ACEPTADA'] }, 1, 0] },
@@ -233,34 +233,34 @@ export class DenunciasService {
       ])
       .exec();
 
-    return denunciasPorTipo;
+    return emergenciasPorTipo;
   }
 
-  async obtenerAllDenuncias(
+  async obtenerAllEmergencias(
     estado: string,
     fechaInicio: string,
     fechaFin: string,
-    tipoDenuncia: string,
+    tipoEmergencia: string,
   ) {
-    const denuncias = await this.obtenerAllDenunciasBD(
+    const emergencias = await this.obtenerAllEmergenciasBD(
       estado,
       fechaInicio,
       fechaFin,
-      tipoDenuncia,
+      tipoEmergencia,
     );
 
-    const denunciasDto = await this.mapearDenuncias(denuncias);
+    const emergenciasDto = await this.mapearEmergencias(emergencias);
 
-    return denunciasDto;
+    return emergenciasDto;
   }
 
-  async obtenerAllDenunciasBD(
+  async obtenerAllEmergenciasBD(
     estado: string,
     fechaInicio: string,
     fechaFin: string,
-    tipoDenuncia: string,
+    tipoEmergencia: string,
   ) {
-    let query = this.denunciaModel.find();
+    let query = this.emergenciaModel.find();
 
     query = query.where('estado').nin(['RECHAZADA', 'CANCELADO', 'PENDIENTE']);
 
@@ -285,20 +285,20 @@ export class DenunciasService {
       query = query.where('createdAt').lte(fecha);
     }
 
-    if (tipoDenuncia) {
-      query = query.where('tipoDenuncia', tipoDenuncia);
+    if (tipoEmergencia) {
+      query = query.where('tipoEmergencia', tipoEmergencia);
     }
 
-    const denuncias = await query.exec();
+    const emergencias = await query.exec();
 
-    return denuncias;
+    return emergencias;
   }
 
-  async obtenerDenunciasPaginadas(
+  async obtenerEmergenciasPaginadas(
     estado: string,
     fechaInicio: string,
     fechaFin: string,
-    tipoDenuncia: string,
+    tipoEmergencia: string,
     pagina: number,
     porPagina: number,
     ordenadoPor: string,
@@ -307,8 +307,8 @@ export class DenunciasService {
   ) {
     const skip = (pagina - 1) * porPagina;
 
-    let query = this.denunciaModel.find();
-    let queryCount = this.denunciaModel.find();
+    let query = this.emergenciaModel.find();
+    let queryCount = this.emergenciaModel.find();
 
     if (estado) {
       query = query.where('estado', estado);
@@ -336,51 +336,53 @@ export class DenunciasService {
       queryCount = queryCount.where('createdAt').lte(fecha);
     }
 
-    if (tipoDenuncia) {
-      query = query.where('tipoDenuncia', tipoDenuncia);
-      queryCount = queryCount.where('tipoDenuncia', tipoDenuncia);
+    if (tipoEmergencia) {
+      query = query.where('tipoEmergencia', tipoEmergencia);
+      queryCount = queryCount.where('tipoEmergencia', tipoEmergencia);
     } else {
-      const tpd = await this.tipoDenunciaModel.find({ departamento }).exec();
-      const map: string[] = tpd.map((tp) => tp.nombre);
-
-      query = query.where('tipoDenuncia').in(map);
-      queryCount = queryCount.where('tipoDenuncia').in(map);
+      // const tpd = await this.tipoEmergenciaModel.find({ departamento }).exec();
+      // const map: string[] = tpd.map((tp) => tp.nombre);
+      //
+      // query = query.where('tipoEmergencia').in(map);
+      // queryCount = queryCount.where('tipoEmergencia').in(map);
     }
 
     const sortField: string = ordenadoPor;
     const sortQuery: { [key: string]: any } = {};
     sortQuery[sortField] = ordenadoDir;
 
-    const [denunciasSaved, totalDenuncias] = await Promise.all([
-      query.sort(sortQuery).skip(skip).limit(porPagina).exec(),
+    const [emergenciasSaved, totalEmergencias] = await Promise.all([
+      // query.sort(sortQuery).skip(skip).limit(porPagina).exec(),
+      query.skip(skip).limit(porPagina).exec(),
       queryCount.countDocuments().exec(),
     ]);
 
-    const totalPaginas = Math.ceil(totalDenuncias / porPagina);
-    const denuncias = await this.mapearDenuncias(denunciasSaved);
-    return { denuncias, totalPaginas };
+    const totalPaginas = Math.ceil(totalEmergencias / porPagina);
+    const emergencias = await this.mapearEmergencias(emergenciasSaved);
+    return { emergencias, totalPaginas };
   }
 
-  private async mapearDenuncias(denuncias): Promise<DenunciaDto[]> {
-    const tiposDenuncias = await this.tipoSolicitudService.mapToTipoDenuncia();
+  private async mapearEmergencias(emergencias): Promise<EmergenciaDto[]> {
+    const tiposEmergencias =
+      await this.tipoSolicitudService.mapToTipoEmergencia();
 
-    return denuncias.map((denuncia) => {
-      const tipoDenuncia = tiposDenuncias.find(
-        (tipo) => tipo.tipo === denuncia.tipoDenuncia,
+    return emergencias.map((emergencia) => {
+      const tipoEmergencia = tiposEmergencias.find(
+        (tipo) => tipo.id === emergencia.tipoEmergencia,
       );
 
       return {
-        _id: denuncia.hash,
-        correo: denuncia.correo,
-        titulo: denuncia.titulo,
-        descripcion: denuncia.descripcion,
-        tipoDenuncia: denuncia.tipoDenuncia,
-        colorMarker: tipoDenuncia ? tipoDenuncia.color : '', // Obtener el color del tipo de denuncia
-        estado: denuncia.estado,
-        imagenesUrls: denuncia.imagenesUrls,
-        lon: denuncia.lon,
-        lat: denuncia.lat,
-        createdAt: this.parseDate(denuncia.createdAt),
+        _id: emergencia.hash,
+        correo: emergencia.correo,
+        titulo: emergencia.titulo,
+        descripcion: emergencia.descripcion,
+        tipoEmergencia: emergencia.tipoEmergencia,
+        colorMarker: tipoEmergencia ? '' : '', // Obtener el color del tipo de emergencia
+        estado: emergencia.estado,
+        imagenesUrls: emergencia.imagenesUrls,
+        lon: emergencia.lon,
+        lat: emergencia.lat,
+        createdAt: this.parseDate(emergencia.createdAt),
       };
     });
   }
@@ -395,7 +397,7 @@ export class DenunciasService {
   }
 
   async buscar(id: string) {
-    const denuncia = await this.denunciaModel
+    const emergencia = await this.emergenciaModel
       .findOne({
         hash: id,
       })
@@ -403,51 +405,51 @@ export class DenunciasService {
     const departamentos = await this.departamentosService.obtenerRegistros();
 
     return {
-      _id: denuncia.hash,
-      correo: denuncia.correo,
-      titulo: denuncia.titulo,
-      descripcion: denuncia.descripcion,
-      tipoDenuncia: denuncia.tipoDenuncia,
-      estado: denuncia.estado,
-      imagenesUrls: denuncia.imagenesUrls,
-      lon: denuncia.lon,
-      lat: denuncia.lat,
-      createdAt: this.parseDate(denuncia.createdAt),
+      _id: emergencia.hash,
+      correo: emergencia.correo,
+      titulo: emergencia.titulo,
+      descripcion: emergencia.descripcion,
+      tipoEmergencia: emergencia.tipoEmergencia,
+      estado: emergencia.estado,
+      imagenesUrls: emergencia.imagenesUrls,
+      lon: emergencia.lon,
+      lat: emergencia.lat,
+      createdAt: this.parseDate(emergencia.createdAt),
       comentarios: await this.parseComments(
-        denuncia.comentarios,
+        emergencia.comentarios,
         departamentos,
       ),
     };
   }
 
-  async actualizarEstadoDenuncia(
+  async actualizarEstadoEmergencia(
     id: string,
-    actualizarEstadoDenunciaRequestDto: ActualizarEstadoDenunciaRequestDto,
+    actualizarEstadoEmergenciaRequestDto: ActualizarEstadoEmergenciaRequestDto,
   ) {
-    const denuncia = await this.denunciaModel.findOne({ hash: id }).exec();
-    if (denuncia == null) {
-      new Error('No existe la denuncia');
+    const emergencia = await this.emergenciaModel.findOne({ hash: id }).exec();
+    if (emergencia == null) {
+      new Error('No existe la emergencia');
     }
 
-    const estado = actualizarEstadoDenunciaRequestDto.estado;
-    denuncia.estado = estado;
+    const estado = actualizarEstadoEmergenciaRequestDto.estado;
+    emergencia.estado = estado;
 
     const comentario = new ComentarioDto();
-    comentario.funcionario = actualizarEstadoDenunciaRequestDto.funcionario;
-    comentario.departamento = actualizarEstadoDenunciaRequestDto.departamento;
-    comentario.comentario = actualizarEstadoDenunciaRequestDto.comentario;
-    comentario.accion = 'Estado de denuncia Actualizado';
+    comentario.funcionario = actualizarEstadoEmergenciaRequestDto.funcionario;
+    comentario.departamento = actualizarEstadoEmergenciaRequestDto.departamento;
+    comentario.comentario = actualizarEstadoEmergenciaRequestDto.comentario;
+    comentario.accion = 'Estado de emergencia Actualizado';
     comentario.createdAt = new Date();
 
-    denuncia.comentarios.push(comentario);
-    await denuncia.save();
+    emergencia.comentarios.push(comentario);
+    await emergencia.save();
 
     const user = await this.userModel
-      .findOne({ correo: denuncia.correo })
+      .findOne({ correo: emergencia.correo })
       .exec();
 
     const tokensDocuments = await this.tokenDispositivoModel
-      .find({ usuario: denuncia.correo })
+      .find({ usuario: emergencia.correo })
       .exec();
 
     const tokens = await tokensDocuments.map(
@@ -456,41 +458,42 @@ export class DenunciasService {
 
     this.notificacionesService.sendNotification(
       tokens,
-      'Estado de denuncia Actualizado',
-      denuncia.titulo + '....',
-      JSON.stringify(denuncia),
-      denuncia.imagenesUrls[0],
-      denuncia.hash,
+      'Estado de emergencia Actualizado',
+      emergencia.titulo + '....',
+      JSON.stringify(emergencia),
+      emergencia.imagenesUrls[0],
+      emergencia.hash,
       user.correo,
     );
-    console.log(JSON.stringify(denuncia));
+    console.log(JSON.stringify(emergencia));
   }
 
-  async agregarComentarioDenuncia(
+  async agregarComentarioEmergencia(
     id: string,
-    agregarComentarioDenunciaRequestDto: AgregarComentarioDenunciaRequestDto,
+    agregarComentarioEmergenciaRequestDto: AgregarComentarioEmergenciaRequestDto,
   ) {
-    const denuncia = await this.denunciaModel.findOne({ hash: id }).exec();
-    if (denuncia == null) {
-      new Error('No existe la denuncia');
+    const emergencia = await this.emergenciaModel.findOne({ hash: id }).exec();
+    if (emergencia == null) {
+      new Error('No existe la emergencia');
     }
 
     const comentario = new ComentarioDto();
-    comentario.funcionario = agregarComentarioDenunciaRequestDto.funcionario;
-    comentario.departamento = agregarComentarioDenunciaRequestDto.departamento;
-    comentario.comentario = agregarComentarioDenunciaRequestDto.comentario;
+    comentario.funcionario = agregarComentarioEmergenciaRequestDto.funcionario;
+    comentario.departamento =
+      agregarComentarioEmergenciaRequestDto.departamento;
+    comentario.comentario = agregarComentarioEmergenciaRequestDto.comentario;
     comentario.accion = 'Comentario';
     comentario.createdAt = new Date();
 
-    denuncia.comentarios.push(comentario);
-    await denuncia.save();
+    emergencia.comentarios.push(comentario);
+    await emergencia.save();
 
     const user = await this.userModel
-      .findOne({ correo: denuncia.correo })
+      .findOne({ correo: emergencia.correo })
       .exec();
 
     const tokensDocuments = await this.tokenDispositivoModel
-      .find({ usuario: denuncia.correo })
+      .find({ usuario: emergencia.correo })
       .exec();
 
     const tokens = await tokensDocuments.map(
@@ -499,36 +502,36 @@ export class DenunciasService {
 
     this.notificacionesService.sendNotification(
       tokens,
-      'Comentario añadido a Denuncia',
-      denuncia.titulo + '....',
-      JSON.stringify(denuncia),
-      denuncia.imagenesUrls[0],
-      denuncia.hash,
+      'Comentario añadido a Emergencia',
+      emergencia.titulo + '....',
+      JSON.stringify(emergencia),
+      emergencia.imagenesUrls[0],
+      emergencia.hash,
       user.correo,
     );
 
-    console.log(JSON.stringify(denuncia));
+    console.log(JSON.stringify(emergencia));
   }
 
-  async actualizarDepartamentoDenuncia(
+  async actualizarDepartamentoEmergencia(
     id: string,
-    actualizarDepartamentoDenunciaRequestDto: ActualizarDepartamentoDenunciaRequestDto,
+    actualizarDepartamentoEmergenciaRequestDto: ActualizarDepartamentoEmergenciaRequestDto,
   ) {
-    const denuncia = await this.denunciaModel.findOne({ hash: id }).exec();
-    if (denuncia == null) {
-      new Error('No existe la denuncia');
+    const emergencia = await this.emergenciaModel.findOne({ hash: id }).exec();
+    if (emergencia == null) {
+      new Error('No existe la emergencia');
     }
 
-    denuncia.tipoDenuncia =
-      actualizarDepartamentoDenunciaRequestDto.departamentoNuevo;
-    await denuncia.save();
+    emergencia.tipoEmergencia =
+      actualizarDepartamentoEmergenciaRequestDto.departamentoNuevo;
+    await emergencia.save();
 
     const user = await this.userModel
-      .findOne({ usuario: denuncia.correo })
+      .findOne({ usuario: emergencia.correo })
       .exec();
 
     const tokensDocuments = await this.tokenDispositivoModel
-      .find({ usuario: denuncia.correo })
+      .find({ usuario: emergencia.correo })
       .exec();
 
     const tokens = await tokensDocuments.map(
@@ -537,15 +540,15 @@ export class DenunciasService {
 
     this.notificacionesService.sendNotification(
       tokens,
-      'Estado de denuncia Actualizado',
-      denuncia.titulo + '....',
-      JSON.stringify(denuncia),
-      denuncia.imagenesUrls[0],
-      denuncia.hash,
+      'Estado de emergencia Actualizado',
+      emergencia.titulo + '....',
+      JSON.stringify(emergencia),
+      emergencia.imagenesUrls[0],
+      emergencia.hash,
       user.correo,
     );
 
-    console.log(JSON.stringify(denuncia));
+    console.log(JSON.stringify(emergencia));
   }
 
   private async parseComments(
@@ -591,15 +594,15 @@ export class DenunciasService {
       joinFilePartRequestDto.requestId,
     );
 
-    const denuncia = await this.denunciaModel
+    const emergencia = await this.emergenciaModel
       .findOne({ hash: joinFilePartRequestDto.requestId })
       .exec();
-    if (denuncia == null) {
-      new Error('No existe la denuncia');
+    if (emergencia == null) {
+      new Error('No existe la emergencia');
     }
 
-    denuncia.audioUrl = audioUrl;
-    await denuncia.save();
+    emergencia.audioUrl = audioUrl;
+    await emergencia.save();
 
     this.filePartModel
       .deleteMany({ requestId: joinFilePartRequestDto.requestId })
@@ -611,6 +614,6 @@ export class DenunciasService {
         console.error('Error al eliminar documentos:', error);
       });
 
-    return denuncia;
+    return emergencia;
   }
 }

@@ -37,9 +37,8 @@ export class NotificacionesService {
     };
 
     try {
-      const response = await this.firebase.messaging.sendEachForMulticast(
-        message,
-      );
+      const response =
+        await this.firebase.messaging.sendEachForMulticast(message);
       console.log('Notificación enviada con éxito.');
       console.log(response);
     } catch (error) {
@@ -64,7 +63,7 @@ export class NotificacionesService {
 
     let historialNotificacionDto = new HistorialNotificacionDto();
     historialNotificacionDto.usuario = usuario;
-    historialNotificacionDto.idDenuncia = hash;
+    historialNotificacionDto.idEmergencia = hash;
     historialNotificacionDto.notification = notificacion;
     historialNotificacionDto.data = {
       data,

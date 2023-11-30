@@ -8,26 +8,26 @@ export class BomberCarController {
   constructor(private readonly bomberCarsService: BomberCarsService) {}
 
   @Post()
-  async create(@Body() createAmbulanciaDto: CreateBombercarDto) {
-    const ambulancia = await this.bomberCarsService.create(createAmbulanciaDto);
+  async create(@Body() createBomberCarDto: CreateBombercarDto) {
+    const bomberCar = await this.bomberCarsService.create(createBomberCarDto);
 
-    return ambulancia;
+    return bomberCar;
   }
 
   @Post('updateposition')
   async updateposition(
-    @Body() updateAmbulanciaUbicacionDto: UpdateBombercarPositionDto,
+    @Body() updateBomberCarUbicacionDto: UpdateBombercarPositionDto,
   ) {
     const position = await this.bomberCarsService.updateposition(
-      updateAmbulanciaUbicacionDto,
+      updateBomberCarUbicacionDto,
     );
 
     return position;
   }
 
   @Post('assign')
-  assign(@Body() createAmbulanciaDto: CreateBombercarDto) {
-    return this.bomberCarsService.create(createAmbulanciaDto);
+  assign(@Body() createBomberCarDto: CreateBombercarDto) {
+    return this.bomberCarsService.create(createBomberCarDto);
   }
 
   @Get('obtenerSugerencia')

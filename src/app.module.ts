@@ -23,10 +23,8 @@ import { DropboxApiModule } from './components/dropbox-client/dropbox-api.module
 import { BufferUtilService } from './common/utils/buffer-util/buffer-util.service';
 import { ClarifaiModule } from './components/clarifai/clarifai.module';
 import { OpenaiModule } from './components/openai/openai.module';
-import { DenunciasModule } from './denuncias/denuncias.module';
-import { HashCodeService } from './common/utils/hash-code/hash-code.service';
 import { DepartamentosModule } from './configurationsresources/departamentos/departamentos.module';
-import { TipoSolicitudModule } from './configurationsresources/tipo-solicitudes/tipo-solicitud.module';
+import { TipoEmergenciaModule } from './configurationsresources/tipo-emergencias/tipo-emergencia.module';
 import { FuncionariosModule } from './configurationsresources/funcionarios/funcionarios.module';
 import { NotificacionesService } from './notificaciones/notificaciones.service';
 import { FirebaseModule } from 'nestjs-firebase';
@@ -38,6 +36,8 @@ import {
 } from './schemas/notificaciones.schema';
 import { RequestsModule } from './requests/requests.module';
 import { BomberCarsModule } from './bombercars/bomberCarsModule';
+import { EmergenciasModule } from './emergencias/emergencias.module';
+import { HashCodeService } from './common/utils/hash-code/hash-code.service';
 
 @Module({
   imports: [
@@ -87,9 +87,9 @@ import { BomberCarsModule } from './bombercars/bomberCarsModule';
     DropboxApiModule,
     ClarifaiModule,
     OpenaiModule,
-    DenunciasModule,
+    EmergenciasModule,
     DepartamentosModule,
-    TipoSolicitudModule,
+    TipoEmergenciaModule,
     FuncionariosModule,
     NotificacionesModule,
     RequestsModule,

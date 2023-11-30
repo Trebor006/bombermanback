@@ -2,10 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { ComentarioDto } from '../common/dto/comentario-dto';
 
-export type DenunciaDocument = HydratedDocument<Denuncia>;
+export type EmergenciaDocument = HydratedDocument<Emergencia>;
 
 @Schema()
-export class Denuncia {
+export class Emergencia {
   @Prop({ required: true })
   hash: string;
 
@@ -19,7 +19,7 @@ export class Denuncia {
   descripcion: string;
 
   @Prop({ required: false })
-  tipoDenuncia: string;
+  tipoEmergencia: string;
 
   @Prop({ required: false })
   estado: string;
@@ -30,7 +30,7 @@ export class Denuncia {
   @Prop({ required: false })
   lat: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   audioUrl: string;
 
   @Prop({ required: false })
@@ -43,4 +43,4 @@ export class Denuncia {
   createdAt: Date;
 }
 
-export const DenunciaSchema = SchemaFactory.createForClass(Denuncia);
+export const EmergenciaSchema = SchemaFactory.createForClass(Emergencia);

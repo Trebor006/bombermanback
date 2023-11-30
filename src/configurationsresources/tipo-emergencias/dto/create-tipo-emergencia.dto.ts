@@ -1,4 +1,4 @@
-export class CreateTipoSolicitudDto {
+export class CreateTipoEmergenciaDto {
   id: string;
   nombre: string;
   descripcion: string;
