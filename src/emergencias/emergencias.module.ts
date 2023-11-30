@@ -32,6 +32,7 @@ import {
   TokenDispositivoSchema,
 } from '../schemas/tokenDispositivo.schema';
 import { FilePart, FilePartSchema } from '../schemas/filePart.schema';
+import { BomberCar, BomberCarSchema } from '../schemas/bomberCarSchema';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { FilePart, FilePartSchema } from '../schemas/filePart.schema';
       { name: TipoEmergencia.name, schema: TipoEmergenciaSchema },
       { name: Departamento.name, schema: DepartamentoSchema },
       { name: FilePart.name, schema: FilePartSchema },
+      { name: BomberCar.name, schema: BomberCarSchema },
     ]),
   ],
   controllers: [EmergenciasController],

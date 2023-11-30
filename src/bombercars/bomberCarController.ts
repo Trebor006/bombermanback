@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { BomberCarsService } from './bomberCars.service';
 import { CreateBombercarDto } from './dto/create-bombercar.dto';
 import { UpdateBombercarPositionDto } from './dto/update-bombercar-position.dto';
@@ -37,6 +37,13 @@ export class BomberCarController {
 
   @Get()
   findAll() {
-    return '';
+    return this.bomberCarsService.listar();
+  }
+
+  @Get('buscar')
+  async buscar(@Query('id') id: string) {
+    const bombercar = await this.bomberCarsService.buscar(id);
+
+    return bombercar;
   }
 }

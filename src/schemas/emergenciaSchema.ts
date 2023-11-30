@@ -25,6 +25,9 @@ export class Emergencia {
   estado: string;
 
   @Prop({ required: false })
+  bomberCarId: string;
+
+  @Prop({ required: false })
   lon: string;
 
   @Prop({ required: false })

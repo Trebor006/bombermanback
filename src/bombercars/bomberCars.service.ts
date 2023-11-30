@@ -126,4 +126,19 @@ export class BomberCarsService {
 
     return resultadoVerificacionImagen;
   }
+
+  async listar() {
+    const bomberCars = await this.bomberCarModel.find();
+    return bomberCars;
+  }
+
+  async buscar(id: string) {
+    const bombercar = await this.bomberCarModel
+      .findOne({
+        id: id,
+      })
+      .exec();
+
+    return bombercar;
+  }
 }

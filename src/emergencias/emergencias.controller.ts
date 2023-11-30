@@ -18,32 +18,13 @@ export class EmergenciasController {
 
   convertirCadenaAArray(cadena: string): string[] {
     return JSON.parse(cadena.replace(/\\/g, ''));
-
-    // const parsedArray = JSON.parse(cadena);
-    // if (
-    //   Array.isArray(parsedArray) &&
-    //   parsedArray.every((item) => typeof item === 'string')
-    // ) {
-    //   return parsedArray;
-    // } else {
-    //   return [];
-    // }
   }
 
   @Post()
   async crear(@Body() crearEmergenciaDto: CrearEmergenciaRequestDto) {
-    // crearEmergenciaDto.imagenesList = this.convertirCadenaAArray(
-    //   crearEmergenciaDto.imagenes,
-    // );
-
-    // const resultValidation =
-    //   this.emergenciasValidatorService.validarDTO(crearEmergenciaDto);
-    // if (resultValidation.length > 0) {
-    //   return BaseResponse.generateError(
-    //     'Error al registrar la emergencia, Datos Incorrectos',
-    //     resultValidation,
-    //   );
-    // }
+    crearEmergenciaDto.imagenesList = this.convertirCadenaAArray(
+      crearEmergenciaDto.imagenes,
+    );
 
     const result = await this.emergenciasService.crear(crearEmergenciaDto);
 

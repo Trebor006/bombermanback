@@ -29,6 +29,7 @@ import { SyncFilePartRequestDto } from './dto/sync-filepart.request.dto';
 import { FilePart } from '../schemas/filePart.schema';
 import { VerificadorCorreoDto } from '../generador-codigo/dto/verificador-correo.dto';
 import { JoinFilePartRequestDto } from './dto/join-filepart.request.dto';
+import { BomberCar } from '../schemas/bomberCarSchema';
 
 @Injectable()
 export class EmergenciasService {
@@ -48,6 +49,8 @@ export class EmergenciasService {
     private tokenDispositivoModel: Model<TokenDispositivo>,
     @InjectModel(TipoEmergencia.name)
     private tipoEmergenciaModel: Model<TipoEmergencia>,
+    @InjectModel(BomberCar.name)
+    private bomberCarModel: Model<BomberCar>,
   ) {}
 
   async crear(createEmergenciaDto: CrearEmergenciaRequestDto) {
@@ -182,10 +185,10 @@ export class EmergenciasService {
     createEmergenciaDto: CrearEmergenciaRequestDto,
     hash: string,
   ) {
-    // const imageUrls = await this.dropboxClientService.subirImagenes(
-    //   createEmergenciaDto,
-    //   hash,
-    // );
+    const imageUrls = await this.dropboxClientService.subirImagenes(
+      createEmergenciaDto,
+      hash,
+    );
 
     const nuevaEmergenciaDto: CrearEmergenciaDto = new CrearEmergenciaDto();
     nuevaEmergenciaDto.hash = hash;
@@ -197,7 +200,7 @@ export class EmergenciasService {
     nuevaEmergenciaDto.lat = createEmergenciaDto.lat;
     nuevaEmergenciaDto.estado = 'PENDIENTE';
     nuevaEmergenciaDto.audioUrl = '';
-    nuevaEmergenciaDto.imagenesUrls = [];
+    nuevaEmergenciaDto.imagenesUrls = imageUrls;
     nuevaEmergenciaDto.createdAt = new Date();
     nuevaEmergenciaDto.comentarios = [];
 
@@ -363,11 +366,9 @@ export class EmergenciasService {
   }
 
   private async mapearEmergencias(emergencias): Promise<EmergenciaDto[]> {
-    const tiposEmergencias =
-      await this.tipoSolicitudService.mapToTipoEmergencia();
-
+    const tiposEmergencias = await this.tipoEmergenciaModel.find();
     return emergencias.map((emergencia) => {
-      const tipoEmergencia = tiposEmergencias.find(
+      const tipoEmergenciaEncontrado = tiposEmergencias.find(
         (tipo) => tipo.id === emergencia.tipoEmergencia,
       );
 
@@ -376,8 +377,10 @@ export class EmergenciasService {
         correo: emergencia.correo,
         titulo: emergencia.titulo,
         descripcion: emergencia.descripcion,
-        tipoEmergencia: emergencia.tipoEmergencia,
-        colorMarker: tipoEmergencia ? '' : '', // Obtener el color del tipo de emergencia
+        tipoEmergencia: tipoEmergenciaEncontrado?.nombre
+          ? tipoEmergenciaEncontrado.nombre
+          : '',
+        colorMarker: tipoEmergenciaEncontrado ? '' : '', // Obtener el color del tipo de emergencia
         estado: emergencia.estado,
         imagenesUrls: emergencia.imagenesUrls,
         lon: emergencia.lon,
@@ -402,23 +405,27 @@ export class EmergenciasService {
         hash: id,
       })
       .exec();
-    const departamentos = await this.departamentosService.obtenerRegistros();
+    // const departamentos = await this.departamentosService.obtenerRegistros();
+    const tiposEmergencia = await this.tipoEmergenciaModel.find();
+    const tipoEmergenciaEncontrado = tiposEmergencia.find(
+      (tipo) => tipo.id === emergencia.tipoEmergencia,
+    );
+
+    const tipoEmergencia = tipoEmergenciaEncontrado.nombre;
 
     return {
       _id: emergencia.hash,
       correo: emergencia.correo,
       titulo: emergencia.titulo,
       descripcion: emergencia.descripcion,
-      tipoEmergencia: emergencia.tipoEmergencia,
+      tipoEmergencia: tipoEmergencia,
       estado: emergencia.estado,
       imagenesUrls: emergencia.imagenesUrls,
+      audioUrl: emergencia.audioUrl,
       lon: emergencia.lon,
       lat: emergencia.lat,
       createdAt: this.parseDate(emergencia.createdAt),
-      comentarios: await this.parseComments(
-        emergencia.comentarios,
-        departamentos,
-      ),
+      comentarios: [],
     };
   }
 
@@ -433,23 +440,30 @@ export class EmergenciasService {
 
     const estado = actualizarEstadoEmergenciaRequestDto.estado;
     emergencia.estado = estado;
+    emergencia.bomberCarId = actualizarEstadoEmergenciaRequestDto.bomberCarId;
 
-    const comentario = new ComentarioDto();
-    comentario.funcionario = actualizarEstadoEmergenciaRequestDto.funcionario;
-    comentario.departamento = actualizarEstadoEmergenciaRequestDto.departamento;
-    comentario.comentario = actualizarEstadoEmergenciaRequestDto.comentario;
-    comentario.accion = 'Estado de emergencia Actualizado';
-    comentario.createdAt = new Date();
+    const bomberCarAssigned = await this.bomberCarModel.findOne({
+      id: emergencia.bomberCarId,
+    });
 
-    emergencia.comentarios.push(comentario);
-    await emergencia.save();
+    console.log('info ' + JSON.stringify(bomberCarAssigned));
+
+    // const comentario = new ComentarioDto();
+    // comentario.funcionario = actualizarEstadoEmergenciaRequestDto.funcionario;
+    // comentario.bomberCarId = actualizarEstadoEmergenciaRequestDto.bomberCarId;
+    // // comentario.comentario = actualizarEstadoEmergenciaRequestDto.comentario;
+    // comentario.accion = 'Estado de emergencia Actualizado';
+    // comentario.createdAt = new Date();
+    //
+    // emergencia.comentarios.push(comentario);
+    // await emergencia.save();
 
     const user = await this.userModel
       .findOne({ correo: emergencia.correo })
       .exec();
 
     const tokensDocuments = await this.tokenDispositivoModel
-      .find({ usuario: emergencia.correo })
+      .find({ usuario: bomberCarAssigned.token })
       .exec();
 
     const tokens = await tokensDocuments.map(
@@ -463,7 +477,7 @@ export class EmergenciasService {
       JSON.stringify(emergencia),
       emergencia.imagenesUrls[0],
       emergencia.hash,
-      user.correo,
+      '',
     );
     console.log(JSON.stringify(emergencia));
   }

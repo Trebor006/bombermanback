@@ -17,6 +17,9 @@ export class BomberCar {
   @Prop({ required: true })
   placa: string;
 
+  @Prop({ required: false })
+  token: string;
+
   @Prop({ required: true })
   createdAt: Date;
 }
