@@ -38,6 +38,10 @@ import { RequestsModule } from './requests/requests.module';
 import { BomberCarsModule } from './bombercars/bomberCarsModule';
 import { EmergenciasModule } from './emergencias/emergencias.module';
 import { HashCodeService } from './common/utils/hash-code/hash-code.service';
+import { PasswordupdatersModule } from './passwordupdaters/passwordupdaters.module';
+import { PasswordupdatersService } from './passwordupdaters/passwordupdaters.service';
+import { MailService } from './mail/mail.service';
+import { BomberPassword, BomberPasswordSchema } from './schemas/bomberPassword';
 
 @Module({
   imports: [
@@ -54,6 +58,7 @@ import { HashCodeService } from './common/utils/hash-code/hash-code.service';
     MongooseModule.forFeature([
       { name: Configuraciones.name, schema: ConfiguracionesSchema },
       { name: Notificaciones.name, schema: NotificacionesSchema },
+      { name: BomberPassword.name, schema: BomberPasswordSchema },
     ]),
     MailerModule.forRootAsync({
       useFactory: () => ({
@@ -94,6 +99,7 @@ import { HashCodeService } from './common/utils/hash-code/hash-code.service';
     NotificacionesModule,
     RequestsModule,
     BomberCarsModule,
+    PasswordupdatersModule,
   ],
   controllers: [AppController],
   providers: [
@@ -105,6 +111,8 @@ import { HashCodeService } from './common/utils/hash-code/hash-code.service';
     BufferUtilService,
     HashCodeService,
     NotificacionesService,
+    PasswordupdatersService,
+    MailService,
   ],
 })
 export class AppModule {}

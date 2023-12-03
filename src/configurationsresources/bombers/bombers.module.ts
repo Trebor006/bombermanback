@@ -13,6 +13,8 @@ import {
   BomberPassword,
   BomberPasswordSchema,
 } from '../../schemas/bomberPassword';
+import { PasswordupdatersService } from '../../passwordupdaters/passwordupdaters.service';
+import { MailService } from '../../mail/mail.service';
 
 @Module({
   imports: [
@@ -23,6 +25,12 @@ import {
     ]),
   ],
   controllers: [BombersController],
-  providers: [BombersService, HashCodeService, DepartamentosService],
+  providers: [
+    BombersService,
+    HashCodeService,
+    DepartamentosService,
+    PasswordupdatersService,
+    MailService,
+  ],
 })
 export class BombersModule {}

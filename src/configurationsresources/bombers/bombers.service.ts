@@ -4,9 +4,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { HashCodeService } from '../../common/utils/hash-code/hash-code.service';
 import { DepartamentosService } from '../departamentos/departamentos.service';
+import * as CryptoJS from 'crypto-js';
 import { Bomber } from '../../schemas/bomberSchema';
 import { LoginBomberDto } from './dto/login-bomber.dto';
 import { BomberPassword } from '../../schemas/bomberPassword';
+import { PasswordupdatersService } from '../../passwordupdaters/passwordupdaters.service';
 
 @Injectable()
 export class BombersService {
@@ -16,7 +18,7 @@ export class BombersService {
     @InjectModel(BomberPassword.name)
     private bomberPasswordModel: Model<BomberPassword>,
     private hashCodeService: HashCodeService,
-    private departamentosService: DepartamentosService,
+    private passwordupdatersService: PasswordupdatersService,
   ) {}
 
   async create(createFuncionarioDto: CreateBomberDto) {
@@ -27,9 +29,9 @@ export class BombersService {
       .exec();
 
     if (bomber != null) {
-      throw new Error(
-        'No se puede registrar debido a que ya existe un bomber con ese ci',
-      );
+      // throw new Error(
+      //   'No se puede registrar debido a que ya existe un bomber con ese ci',
+      // );
     }
 
     createFuncionarioDto.id =
@@ -38,6 +40,11 @@ export class BombersService {
 
     const bomberRepository = new this.bomberModel(createFuncionarioDto);
     const bomberSaved = await bomberRepository.save();
+
+    this.passwordupdatersService.generarNuevaContrasena(
+      bomberSaved.id,
+      createFuncionarioDto.correo,
+    );
 
     return bomberSaved;
   }
@@ -67,9 +74,9 @@ export class BombersService {
       .exec();
 
     if (bomber != null) {
-      const pass = await this.bomberPasswordModel.find({
+      const pass = await this.bomberPasswordModel.findOne({
         bomberId: bomber.id,
-        password: loginFuncionarioDto.password,
+        password: this.encriptar(loginFuncionarioDto.password),
       });
 
       if (pass != null) {
@@ -97,5 +104,9 @@ export class BombersService {
     return {
       success: false,
     };
+  }
+
+  private encriptar(password: string) {
+    return CryptoJS.SHA256(password).toString();
   }
 }
