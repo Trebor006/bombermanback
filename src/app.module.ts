@@ -25,7 +25,7 @@ import { ClarifaiModule } from './components/clarifai/clarifai.module';
 import { OpenaiModule } from './components/openai/openai.module';
 import { DepartamentosModule } from './configurationsresources/departamentos/departamentos.module';
 import { TipoEmergenciaModule } from './configurationsresources/tipo-emergencias/tipo-emergencia.module';
-import { FuncionariosModule } from './configurationsresources/funcionarios/funcionarios.module';
+import { BombersModule } from './configurationsresources/bombers/bombers.module';
 import { NotificacionesService } from './notificaciones/notificaciones.service';
 import { FirebaseModule } from 'nestjs-firebase';
 import { join } from 'path';
@@ -90,7 +90,7 @@ import { HashCodeService } from './common/utils/hash-code/hash-code.service';
     EmergenciasModule,
     DepartamentosModule,
     TipoEmergenciaModule,
-    FuncionariosModule,
+    BombersModule,
     NotificacionesModule,
     RequestsModule,
     BomberCarsModule,

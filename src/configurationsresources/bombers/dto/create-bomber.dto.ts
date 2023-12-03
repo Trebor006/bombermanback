@@ -1,4 +1,4 @@
-export class CreateFuncionarioDto {
+export class CreateBomberDto {
   id: string;
   apellido: string;
   celular: string;
