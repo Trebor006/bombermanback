@@ -3,12 +3,12 @@ import { CreateBomberDto } from './dto/create-bomber.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { HashCodeService } from '../../common/utils/hash-code/hash-code.service';
-import { DepartamentosService } from '../departamentos/departamentos.service';
 import * as CryptoJS from 'crypto-js';
 import { Bomber } from '../../schemas/bomberSchema';
 import { LoginBomberDto } from './dto/login-bomber.dto';
 import { BomberPassword } from '../../schemas/bomberPassword';
 import { PasswordupdatersService } from '../../passwordupdaters/passwordupdaters.service';
+import { UpdatePasswordBomberDto } from './dto/update-password-bomber.dto';
 
 @Injectable()
 export class BombersService {
@@ -108,5 +108,49 @@ export class BombersService {
 
   private encriptar(password: string) {
     return CryptoJS.SHA256(password).toString();
+  }
+
+  async actualizarContrasena(updatePasswordBomberDto: UpdatePasswordBomberDto) {
+    const bomber = await this.bomberModel
+      .findOne({
+        correo: updatePasswordBomberDto.correo,
+      })
+      .exec();
+
+    if (bomber != null) {
+      const bomberId = bomber.id;
+
+      const pass = await this.bomberPasswordModel.findOne({
+        bomberId: bomber.id,
+        password: this.encriptar(
+          updatePasswordBomberDto.contrasenaActualEncriptada,
+        ),
+      });
+
+      if (pass != null) {
+        this.bomberPasswordModel.deleteOne({
+          bomberId: bomber.id,
+          password: updatePasswordBomberDto.contrasenaActualEncriptada,
+        });
+
+        const data = {
+          bomberId,
+          password: updatePasswordBomberDto.nuevaContrasenaEncriptada,
+          createdAt: new Date(),
+        };
+        const model = new this.bomberPasswordModel(data);
+        const newSaved = await model.save();
+
+        if (newSaved != null) {
+          return {
+            success: true,
+          };
+        }
+      }
+    }
+
+    return {
+      success: false,
+    };
   }
 }

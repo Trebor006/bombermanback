@@ -11,6 +11,7 @@ import {
 import { BombersService } from './bombers.service';
 import { CreateBomberDto } from './dto/create-bomber.dto';
 import { LoginBomberDto } from './dto/login-bomber.dto';
+import { UpdatePasswordBomberDto } from './dto/update-password-bomber.dto';
 
 @Controller('bombers')
 export class BombersController {
@@ -35,5 +36,11 @@ export class BombersController {
   login(@Body() loginFuncionarioDto: LoginBomberDto) {
     console.log('login funcionario!!!');
     return this.bombersService.login(loginFuncionarioDto);
+  }
+
+  @Post('actualizar-contrasena')
+  updatePassword(@Body() updatePasswordBomberDto: UpdatePasswordBomberDto) {
+    console.log('actualizando contrasena');
+    return this.bombersService.actualizarContrasena(updatePasswordBomberDto);
   }
 }
