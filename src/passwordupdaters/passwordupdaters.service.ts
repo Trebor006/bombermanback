@@ -29,7 +29,8 @@ export class PasswordupdatersService {
     this.mailService.sendUpdatePasswordMail(
       correo,
       nuevaContrasena,
-      'http://localhost:3000/updatepassword?correo=' + correo,
+      'https://bomberman-web-app-wijox.ondigitalocean.app/updatepassword?correo=' +
+        correo,
     );
   }
 
