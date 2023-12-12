@@ -6,7 +6,7 @@ export type NotificacionesDocument = HydratedDocument<Notificaciones>;
 
 @Schema()
 export class Notificaciones {
-  @Prop({ required: true })
+  @Prop({ required: false })
   usuario: string;
 
   @Prop({ required: true })

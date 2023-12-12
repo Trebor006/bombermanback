@@ -27,11 +27,14 @@ import {
   Notificaciones,
   NotificacionesSchema,
 } from '../schemas/notificaciones.schema';
+import { Emergencia, EmergenciaSchema } from '../schemas/emergenciaSchema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: BomberCar.name, schema: BomberCarSchema },
+      { name: BomberCarEmergencia.name, schema: BomberCarEmergenciaSchema },
+      { name: Emergencia.name, schema: EmergenciaSchema },
       { name: Notificaciones.name, schema: NotificacionesSchema },
       { name: BomberCarTokens.name, schema: BomberCarTokensSchema },
       { name: BomberCarPosition.name, schema: BomberCarPositionSchema },

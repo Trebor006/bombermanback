@@ -14,6 +14,7 @@ import { BomberCarEmergencia } from '../schemas/bomberCarEmergenciaSchema';
 import { BindTokenBombercarDto } from './dto/bind-token-bombercar.dto';
 import { BomberCarTokens } from '../schemas/bomberCarTokensSchema';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
+import { Emergencia } from '../schemas/emergenciaSchema';
 
 @Injectable()
 export class BomberCarsService {
@@ -29,6 +30,10 @@ export class BomberCarsService {
     private bomberCarPositionModel: Model<BomberCarPosition>,
     @InjectModel(BomberCarPositionHistory.name)
     private bomberCarPositionHistoryModel: Model<BomberCarPositionHistory>,
+    @InjectModel(BomberCarEmergencia.name)
+    private bomberCarEmergenciaModel: Model<BomberCarEmergencia>,
+    @InjectModel(Emergencia.name)
+    private emergenciaModel: Model<Emergencia>,
   ) {}
 
   async create(createBomberCarDto: CreateBombercarDto) {
@@ -52,6 +57,35 @@ export class BomberCarsService {
       updateBomberCarUbicacionDto,
     );
     const bomberCarPositionSaved = await newBomberCarPosition.save();
+
+    const bomberCarEmergenciaSaved = await this.bomberCarEmergenciaModel
+      .findOne({
+        bomberCarId: updateBomberCarUbicacionDto.bomberCarId,
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const emergenciaSaved = await this.emergenciaModel
+      .findOne({
+        id: bomberCarEmergenciaSaved.emergenciaId,
+      })
+      .exec();
+
+    this.notificacionesService.sendNotification(
+      [emergenciaSaved.token],
+      '',
+      '',
+      JSON.stringify({
+        titleType: 'background',
+        notificationType: 'POSITION_UPDATED',
+        lon: bomberCarPositionSaved.lon,
+        lat: bomberCarPositionSaved.lat,
+        emergencyId: emergenciaSaved.id,
+        bomberCarId: bomberCarPositionSaved.bomberCarId,
+      }),
+      emergenciaSaved.id,
+      '',
+    );
 
     return bomberCarPositionSaved;
   }
