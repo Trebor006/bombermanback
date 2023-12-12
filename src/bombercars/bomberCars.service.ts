@@ -125,29 +125,43 @@ export class BomberCarsService {
     const emergenciaSaved = await this.emergenciaModel
       .findOne({ hash: emergenciaId })
       .exec();
-
+    let bomberCarId = '';
     const bomberCarsDisponibles = await this.bomberCarModel.find({
       status: 'AVAILABLE',
     });
-    const bomberCarsIds = bomberCarsDisponibles.map((bombercar) => {
-      return bombercar.id;
-    });
 
-    const currentPositions = await this.bomberCarPositionModel.find({
-      bomberCarId: { $in: bomberCarsIds },
-    });
+    if (bomberCarsDisponibles.length > 0) {
+      const bomberCarsIds = bomberCarsDisponibles.map((bombercar) => {
+        return bombercar.id;
+      });
 
-    const parsedList = this.parsearBomberCars(currentPositions);
+      const currentPositions = await this.bomberCarPositionModel.find({
+        bomberCarId: { $in: bomberCarsIds },
+      });
 
-    const bomberCarId = await this.verificarImagenCorrespondeTipoEmergencia(
-      parsedList,
-      {
-        lat: emergenciaSaved.lat,
-        lon: emergenciaSaved.lon,
-      },
-    );
+      const parsedList = this.parsearBomberCars(currentPositions);
+
+      const bomberCarIdSuggested =
+        await this.verificarImagenCorrespondeTipoEmergencia(parsedList, {
+          lat: emergenciaSaved.lat,
+          lon: emergenciaSaved.lon,
+        });
+
+      bomberCarId = this.extractId(bomberCarIdSuggested);
+    }
 
     return bomberCarId;
+  }
+
+  extractId(text: string): string {
+    const idPattern = /id\s*:\s*(\S+)/i;
+    const match = text.match(idPattern);
+
+    if (match && match[1]) {
+      return match[1].trim();
+    } else {
+      return '';
+    }
   }
 
   parsearBomberCars(bomberCars: BomberCarPosition[]): [] {
