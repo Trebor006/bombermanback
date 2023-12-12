@@ -15,6 +15,11 @@ import {
 } from '../../schemas/bomberPassword';
 import { PasswordupdatersService } from '../../passwordupdaters/passwordupdaters.service';
 import { MailService } from '../../mail/mail.service';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
+import {
+  Notificaciones,
+  NotificacionesSchema,
+} from '../../schemas/notificaciones.schema';
 
 @Module({
   imports: [

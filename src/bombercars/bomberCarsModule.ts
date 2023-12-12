@@ -23,11 +23,16 @@ import {
   BomberCarTokensSchema,
 } from '../schemas/bomberCarTokensSchema';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
+import {
+  Notificaciones,
+  NotificacionesSchema,
+} from '../schemas/notificaciones.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: BomberCar.name, schema: BomberCarSchema },
+      { name: Notificaciones.name, schema: NotificacionesSchema },
       { name: BomberCarEmergencia.name, schema: BomberCarEmergenciaSchema },
       { name: BomberCarTokens.name, schema: BomberCarTokensSchema },
       { name: BomberCarPosition.name, schema: BomberCarPositionSchema },
@@ -44,6 +49,7 @@ import { NotificacionesService } from '../notificaciones/notificaciones.service'
     PromptsService,
     NotificacionesService,
     OpenaiService,
+    NotificacionesService,
   ],
 })
 export class BomberCarsModule {}
