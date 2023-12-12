@@ -239,6 +239,7 @@ export class BomberCarsService {
         id: bomberCarId,
       })
       .exec();
+    console.log('bomberCarSaved ' + JSON.stringify(bomberCarSaved));
 
     if (bomberCarSaved.status === 'BUSY') {
       const bomberCarEmergenciaSaved = await this.bomberCarEmergenciaModel
@@ -249,7 +250,7 @@ export class BomberCarsService {
         .exec();
 
       const emergenciaSaved = await this.emergenciaModel
-        .findOne({ id: bomberCarEmergenciaSaved.emergenciaId })
+        .findOne({ hash: bomberCarEmergenciaSaved.emergenciaId })
         .exec();
 
       return {
@@ -281,7 +282,7 @@ export class BomberCarsService {
         .exec();
 
       const emergenciaSaved = await this.emergenciaModel
-        .findOne({ id: bomberCarEmergenciaSaved.emergenciaId })
+        .findOne({ hash: bomberCarEmergenciaSaved.emergenciaId })
         .exec();
 
       emergenciaSaved.estado = 'PROCESADA';
