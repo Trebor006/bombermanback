@@ -20,7 +20,7 @@ export class BomberCarsService {
     @InjectModel(BomberCarPosition.name)
     private bomberCarPositionModel: Model<BomberCarPosition>,
     @InjectModel(BomberCarPositionHistory.name)
-    private BomberCarPositionHistoryModel: Model<BomberCarPositionHistory>,
+    private bomberCarPositionHistoryModel: Model<BomberCarPositionHistory>,
   ) {}
 
   async create(createBomberCarDto: CreateBombercarDto) {
@@ -56,7 +56,7 @@ export class BomberCarsService {
 
       if (currentBomberCarPosition) {
         // Crear un nuevo documento en BomberCarPositionHistory con los datos del documento actual
-        const bomberCarPositionHistory = new this.BomberCarPositionHistoryModel(
+        const bomberCarPositionHistory = new this.bomberCarPositionHistoryModel(
           currentBomberCarPosition.toObject(),
         );
 
@@ -140,5 +140,37 @@ export class BomberCarsService {
       .exec();
 
     return bombercar;
+  }
+
+  async positionHistory(bomberCarId: string, lastTimeModified: string) {
+    let currentPositions = [];
+    if (lastTimeModified) {
+      const fecha = new Date(lastTimeModified);
+
+      // Si estás usando el formato de fecha y hora con zona horaria en UTC,
+      // puedes convertir la fecha a UTC antes de hacer la consulta.
+      fecha.setMinutes(fecha.getMinutes() - fecha.getTimezoneOffset());
+
+      const tipoEmergenciasUpdated = await this.bomberCarPositionHistoryModel
+        .find({ bomberCarId, createdAt: { $gte: fecha } })
+        .sort({ createdAt: -1 })
+        .exec();
+
+      currentPositions = tipoEmergenciasUpdated;
+    } else {
+      currentPositions = await this.bomberCarPositionHistoryModel
+        .find({ bomberCarId })
+        .exec();
+    }
+
+    return currentPositions;
+  }
+
+  async currentPosition(bomberCarId: string) {
+    const currentPosition = await this.bomberCarPositionModel
+      .find({ bomberCarId })
+      .exec();
+
+    return currentPosition;
   }
 }

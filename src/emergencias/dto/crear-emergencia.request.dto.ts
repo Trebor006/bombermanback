@@ -1,4 +1,5 @@
 export class CrearEmergenciaRequestDto {
+  token: string;
   usuario: string;
 
   titulo: string;

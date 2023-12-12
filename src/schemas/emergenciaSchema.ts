@@ -7,6 +7,9 @@ export type EmergenciaDocument = HydratedDocument<Emergencia>;
 @Schema()
 export class Emergencia {
   @Prop({ required: true })
+  token: string;
+
+  @Prop({ required: true })
   hash: string;
 
   @Prop({ required: true })

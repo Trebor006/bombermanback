@@ -46,4 +46,25 @@ export class BomberCarController {
 
     return bombercar;
   }
+
+  @Get('position-history')
+  async positionHistory(
+    @Query('bomberCarId') bomberCarId: string,
+    @Query('initialDate') initialDate: string,
+  ) {
+    const bombercarhistory = await this.bomberCarsService.positionHistory(
+      bomberCarId,
+      initialDate,
+    );
+
+    return bombercarhistory;
+  }
+
+  @Get('current-position')
+  async currentPosition(@Query('bomberCarId') bomberCarId: string) {
+    const bombercarhistory =
+      await this.bomberCarsService.currentPosition(bomberCarId);
+
+    return bombercarhistory;
+  }
 }
