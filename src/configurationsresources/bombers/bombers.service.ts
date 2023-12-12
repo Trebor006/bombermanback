@@ -76,7 +76,7 @@ export class BombersService {
     if (bomber != null) {
       const pass = await this.bomberPasswordModel.findOne({
         bomberId: bomber.id,
-        password: this.encriptar(loginFuncionarioDto.password),
+        password: loginFuncionarioDto.password,
       });
 
       if (pass != null) {
@@ -122,9 +122,7 @@ export class BombersService {
 
       const pass = await this.bomberPasswordModel.findOne({
         bomberId: bomber.id,
-        password: this.encriptar(
-          updatePasswordBomberDto.contrasenaActualEncriptada,
-        ),
+        password: updatePasswordBomberDto.contrasenaActualEncriptada,
       });
 
       if (pass != null) {
