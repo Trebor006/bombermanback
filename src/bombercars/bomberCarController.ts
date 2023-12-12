@@ -27,11 +27,6 @@ export class BomberCarController {
     return position;
   }
 
-  @Post('assign')
-  assign(@Body() assignBomberCarDto: AssignBomberCarDto) {
-    return this.bomberCarsService.assign(assignBomberCarDto);
-  }
-
   @Get('obtenerSugerencia')
   obtenerSugerencia() {
     return this.bomberCarsService.obtenerSugerencia();

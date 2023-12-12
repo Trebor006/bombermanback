@@ -30,6 +30,9 @@ import { FilePart } from '../schemas/filePart.schema';
 import { VerificadorCorreoDto } from '../generador-codigo/dto/verificador-correo.dto';
 import { JoinFilePartRequestDto } from './dto/join-filepart.request.dto';
 import { BomberCar } from '../schemas/bomberCarSchema';
+import { AssignBomberCarDto } from '../bombercars/dto/assign-bombercar.dto';
+import { BomberCarEmergencia } from '../schemas/bomberCarEmergenciaSchema';
+import { BomberCarTokens } from '../schemas/bomberCarTokensSchema';
 
 @Injectable()
 export class EmergenciasService {
@@ -51,6 +54,10 @@ export class EmergenciasService {
     private tipoEmergenciaModel: Model<TipoEmergencia>,
     @InjectModel(BomberCar.name)
     private bomberCarModel: Model<BomberCar>,
+    @InjectModel(BomberCarEmergencia.name)
+    private bomberCarEmergenciaModel: Model<BomberCarEmergencia>,
+    @InjectModel(BomberCarTokens.name)
+    private bomberCarTokenModel: Model<BomberCarTokens>,
   ) {}
 
   async crear(createEmergenciaDto: CrearEmergenciaRequestDto) {
@@ -448,37 +455,39 @@ export class EmergenciasService {
 
     console.log('info ' + JSON.stringify(bomberCarAssigned));
 
-    // const comentario = new ComentarioDto();
-    // comentario.funcionario = actualizarEstadoEmergenciaRequestDto.funcionario;
-    // comentario.bomberCarId = actualizarEstadoEmergenciaRequestDto.bomberCarId;
-    // // comentario.comentario = actualizarEstadoEmergenciaRequestDto.comentario;
-    // comentario.accion = 'Estado de emergencia Actualizado';
-    // comentario.createdAt = new Date();
-    //
-    // emergencia.comentarios.push(comentario);
-    // await emergencia.save();
+    const bomberCarEmergenciaSaved = new this.bomberCarEmergenciaModel({
+      bomberCarId: emergencia.bomberCarId,
+      emergenciaId: id,
+      createdAt: new Date(),
+    });
+    bomberCarAssigned.status = 'BUSY';
+    bomberCarAssigned.save();
 
-    const user = await this.userModel
-      .findOne({ correo: emergencia.correo })
+    const tokensBombers = await this.bomberCarTokenModel
+      .find({
+        bomberCarId: emergencia.bomberCarId,
+      })
       .exec();
 
-    const tokensDocuments = await this.tokenDispositivoModel
-      .find({ usuario: bomberCarAssigned.token })
-      .exec();
+    const tokens = tokensBombers.map((document) => {
+      return document.token;
+    });
 
-    const tokens = await tokensDocuments.map(
-      (tokensDocuments) => tokensDocuments.tokenDevice,
-    );
+    if (tokens.length > 0) {
+      this.notificacionesService.sendNotification(
+        tokens,
+        'La emergencia ha sido asignada a un equipo',
+        'Emergencia asignada a un equipo, revisa los datos actualizados' +
+          '....',
+        '',
+        id,
+        '',
+      );
+    }
 
-    this.notificacionesService.sendNotification(
-      tokens,
-      'Estado de emergencia Actualizado',
-      emergencia.titulo + '....',
-      JSON.stringify(emergencia),
-      emergencia.hash,
-      '',
-    );
     console.log(JSON.stringify(emergencia));
+
+    await bomberCarEmergenciaSaved.save();
   }
 
   async agregarComentarioEmergencia(

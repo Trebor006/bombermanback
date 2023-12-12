@@ -33,12 +33,22 @@ import {
 } from '../schemas/tokenDispositivo.schema';
 import { FilePart, FilePartSchema } from '../schemas/filePart.schema';
 import { BomberCar, BomberCarSchema } from '../schemas/bomberCarSchema';
+import {
+  BomberCarEmergencia,
+  BomberCarEmergenciaSchema,
+} from '../schemas/bomberCarEmergenciaSchema';
+import {
+  BomberCarTokens,
+  BomberCarTokensSchema,
+} from '../schemas/bomberCarTokensSchema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Usuario.name, schema: UsuarioSchema },
       { name: Notificaciones.name, schema: NotificacionesSchema },
+      { name: BomberCarEmergencia.name, schema: BomberCarEmergenciaSchema },
+      { name: BomberCarTokens.name, schema: BomberCarTokensSchema },
       { name: TokenDispositivo.name, schema: TokenDispositivoSchema },
       { name: Emergencia.name, schema: EmergenciaSchema },
       { name: TipoEmergencia.name, schema: TipoEmergenciaSchema },

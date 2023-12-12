@@ -25,8 +25,6 @@ export class BomberCarsService {
     @InjectModel(BomberCar.name) private bomberCarModel: Model<BomberCar>,
     @InjectModel(BomberCarTokens.name)
     private bomberCarTokenModel: Model<BomberCarTokens>,
-    @InjectModel(BomberCarEmergencia.name)
-    private bomberCarEmergenciaModel: Model<BomberCarEmergencia>,
     @InjectModel(BomberCarPosition.name)
     private bomberCarPositionModel: Model<BomberCarPosition>,
     @InjectModel(BomberCarPositionHistory.name)
@@ -182,42 +180,6 @@ export class BomberCarsService {
       .exec();
 
     return currentPosition;
-  }
-
-  async assign(assignBomberCarDto: AssignBomberCarDto) {
-    const bomberCarEmergenciaSaved = new this.bomberCarEmergenciaModel(
-      assignBomberCarDto,
-    );
-
-    const bombercar = await this.bomberCarModel
-      .findOne({
-        id: assignBomberCarDto.bomberCarId,
-      })
-      .exec();
-
-    bombercar.status = 'BUSY';
-    bombercar.save();
-
-    const tokensBombers = await this.bomberCarTokenModel
-      .find({
-        bomberCarId: assignBomberCarDto.bomberCarId,
-      })
-      .exec();
-
-    const tokens = tokensBombers.map((document) => {
-      return document.token;
-    });
-
-    this.notificacionesService.sendNotification(
-      tokens,
-      'La emergencia ha sido asignada a un equipo',
-      'Emergencia asignada a un equipo, revisa los datos actualizados' + '....',
-      '',
-      assignBomberCarDto.emergenciaId,
-      '',
-    );
-
-    await bomberCarEmergenciaSaved.save();
   }
 
   async bindToken(bindTokenBombercarDto: BindTokenBombercarDto) {

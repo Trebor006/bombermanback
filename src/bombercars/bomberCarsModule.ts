@@ -33,7 +33,6 @@ import {
     MongooseModule.forFeature([
       { name: BomberCar.name, schema: BomberCarSchema },
       { name: Notificaciones.name, schema: NotificacionesSchema },
-      { name: BomberCarEmergencia.name, schema: BomberCarEmergenciaSchema },
       { name: BomberCarTokens.name, schema: BomberCarTokensSchema },
       { name: BomberCarPosition.name, schema: BomberCarPositionSchema },
       {
