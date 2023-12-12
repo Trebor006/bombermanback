@@ -121,15 +121,33 @@ export class BomberCarsService {
     }
   }
 
-  async obtenerSugerencia() {
-    const currentPositions = await this.bomberCarPositionModel.find();
+  async obtenerSugerencia(emergenciaId: string) {
+    const emergenciaSaved = await this.emergenciaModel
+      .findOne({ hash: emergenciaId })
+      .exec();
+
+    const bomberCarsDisponibles = await this.bomberCarModel.find({
+      status: 'AVAILABLE',
+    });
+    const bomberCarsIds = bomberCarsDisponibles.map((bombercar) => {
+      return bombercar.id;
+    });
+
+    const currentPositions = await this.bomberCarPositionModel.find({
+      bomberCarId: { $in: bomberCarsIds },
+    });
 
     const parsedList = this.parsearBomberCars(currentPositions);
 
-    this.verificarImagenCorrespondeTipoEmergencia(parsedList, {
-      lat: -17.344215,
-      lon: -63.358794,
-    });
+    const bomberCarId = await this.verificarImagenCorrespondeTipoEmergencia(
+      parsedList,
+      {
+        lat: emergenciaSaved.lat,
+        lon: emergenciaSaved.lon,
+      },
+    );
+
+    return bomberCarId;
   }
 
   parsearBomberCars(bomberCars: BomberCarPosition[]): [] {

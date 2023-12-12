@@ -28,8 +28,8 @@ export class BomberCarController {
   }
 
   @Get('obtenerSugerencia')
-  obtenerSugerencia() {
-    return this.bomberCarsService.obtenerSugerencia();
+  obtenerSugerencia(@Query('emergenciaId') emergenciaId: string) {
+    return this.bomberCarsService.obtenerSugerencia(emergenciaId);
   }
 
   @Get()
