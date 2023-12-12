@@ -475,7 +475,6 @@ export class EmergenciasService {
       'Estado de emergencia Actualizado',
       emergencia.titulo + '....',
       JSON.stringify(emergencia),
-      emergencia.imagenesUrls[0],
       emergencia.hash,
       '',
     );
@@ -519,7 +518,6 @@ export class EmergenciasService {
       'Comentario añadido a Emergencia',
       emergencia.titulo + '....',
       JSON.stringify(emergencia),
-      emergencia.imagenesUrls[0],
       emergencia.hash,
       user.correo,
     );
@@ -557,7 +555,6 @@ export class EmergenciasService {
       'Estado de emergencia Actualizado',
       emergencia.titulo + '....',
       JSON.stringify(emergencia),
-      emergencia.imagenesUrls[0],
       emergencia.hash,
       user.correo,
     );

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBombercarDto } from './dto/create-bombercar.dto';
 import { HashCodeService } from '../common/utils/hash-code/hash-code.service';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectModel, Prop } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BomberCar } from '../schemas/bomberCarSchema';
 import { UpdateBombercarPositionDto } from './dto/update-bombercar-position.dto';
@@ -9,6 +9,11 @@ import { BomberCarPosition } from '../schemas/bomber-car-position.schema';
 import { BomberCarPositionHistory } from '../schemas/bomber-car-position-history.schema';
 import { PromptsService } from '../emergencias/prompts.service';
 import { OpenaiService } from '../components/openai/openai.service';
+import { AssignBomberCarDto } from './dto/assign-bombercar.dto';
+import { BomberCarEmergencia } from '../schemas/bomberCarEmergenciaSchema';
+import { BindTokenBombercarDto } from './dto/bind-token-bombercar.dto';
+import { BomberCarTokens } from '../schemas/bomberCarTokensSchema';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 
 @Injectable()
 export class BomberCarsService {
@@ -16,7 +21,12 @@ export class BomberCarsService {
     private hashCodeService: HashCodeService,
     private promptsService: PromptsService,
     private openaiService: OpenaiService,
+    private notificacionesService: NotificacionesService,
     @InjectModel(BomberCar.name) private bomberCarModel: Model<BomberCar>,
+    @InjectModel(BomberCarTokens.name)
+    private bomberCarTokenModel: Model<BomberCarTokens>,
+    @InjectModel(BomberCarEmergencia.name)
+    private bomberCarEmergenciaModel: Model<BomberCarEmergencia>,
     @InjectModel(BomberCarPosition.name)
     private bomberCarPositionModel: Model<BomberCarPosition>,
     @InjectModel(BomberCarPositionHistory.name)
@@ -172,5 +182,58 @@ export class BomberCarsService {
       .exec();
 
     return currentPosition;
+  }
+
+  async assign(assignBomberCarDto: AssignBomberCarDto) {
+    const bomberCarEmergenciaSaved = new this.bomberCarEmergenciaModel(
+      assignBomberCarDto,
+    );
+
+    const bombercar = await this.bomberCarModel
+      .findOne({
+        id: assignBomberCarDto.bomberCarId,
+      })
+      .exec();
+
+    bombercar.status = 'BUSY';
+    bombercar.save();
+
+    const tokensBombers = await this.bomberCarTokenModel
+      .find({
+        bomberCarId: assignBomberCarDto.bomberCarId,
+      })
+      .exec();
+
+    const tokens = tokensBombers.map((document) => {
+      return document.token;
+    });
+
+    this.notificacionesService.sendNotification(
+      tokens,
+      'La emergencia ha sido asignada a un equipo',
+      'Emergencia asignada a un equipo, revisa los datos actualizados' + '....',
+      '',
+      assignBomberCarDto.emergenciaId,
+      '',
+    );
+
+    await bomberCarEmergenciaSaved.save();
+  }
+
+  async bindToken(bindTokenBombercarDto: BindTokenBombercarDto) {
+    await this.bomberCarTokenModel
+      .deleteMany({
+        bomberCarId: bindTokenBombercarDto.bomberCarId,
+        bomberId: bindTokenBombercarDto.bomberId,
+      })
+      .exec();
+
+    bindTokenBombercarDto.createdAt = new Date();
+    const newBomberCarToken = new this.bomberCarTokenModel(
+      bindTokenBombercarDto,
+    );
+    const newBomberCarTokenSaved = await newBomberCarToken.save();
+
+    return newBomberCarTokenSaved;
   }
 }

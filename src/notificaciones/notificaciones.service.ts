@@ -20,7 +20,6 @@ export class NotificacionesService {
     title: string,
     body: string,
     data: string,
-    imageUrl: string,
     hash: string,
     usuario: string,
   ) {
@@ -28,7 +27,6 @@ export class NotificacionesService {
       notification: {
         title,
         body,
-        imageUrl,
       },
       data: {
         data,
@@ -45,23 +43,22 @@ export class NotificacionesService {
       console.error('Error al enviar la notificación:', error);
     }
 
-    this.guardarNotificacion(title, body, data, imageUrl, hash, usuario);
+    this.guardarNotificacion(title, body, data, hash, usuario);
   }
 
   async guardarNotificacion(
     title: string,
     body: string,
     data: string,
-    imageUrl: string,
     hash: string,
     usuario: string,
   ) {
-    let notificacion = new NotificationDto();
+    const notificacion = new NotificationDto();
     notificacion.body = body;
     notificacion.title = title;
-    notificacion.imageUrl = imageUrl;
+    notificacion.imageUrl = '';
 
-    let historialNotificacionDto = new HistorialNotificacionDto();
+    const historialNotificacionDto = new HistorialNotificacionDto();
     historialNotificacionDto.usuario = usuario;
     historialNotificacionDto.idEmergencia = hash;
     historialNotificacionDto.notification = notificacion;

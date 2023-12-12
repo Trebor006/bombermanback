@@ -2,6 +2,8 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { BomberCarsService } from './bomberCars.service';
 import { CreateBombercarDto } from './dto/create-bombercar.dto';
 import { UpdateBombercarPositionDto } from './dto/update-bombercar-position.dto';
+import { AssignBomberCarDto } from './dto/assign-bombercar.dto';
+import { BindTokenBombercarDto } from './dto/bind-token-bombercar.dto';
 
 @Controller('bombercars')
 export class BomberCarController {
@@ -26,8 +28,8 @@ export class BomberCarController {
   }
 
   @Post('assign')
-  assign(@Body() createBomberCarDto: CreateBombercarDto) {
-    return this.bomberCarsService.create(createBomberCarDto);
+  assign(@Body() assignBomberCarDto: AssignBomberCarDto) {
+    return this.bomberCarsService.assign(assignBomberCarDto);
   }
 
   @Get('obtenerSugerencia')
@@ -66,5 +68,10 @@ export class BomberCarController {
       await this.bomberCarsService.currentPosition(bomberCarId);
 
     return bombercarhistory;
+  }
+
+  @Get('register-token')
+  async bindToken(@Body() bindTokenBombercarDto: BindTokenBombercarDto) {
+    return await this.bomberCarsService.bindToken(bindTokenBombercarDto);
   }
 }

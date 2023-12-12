@@ -14,11 +14,22 @@ import {
 } from '../schemas/bomber-car-position-history.schema';
 import { PromptsService } from '../emergencias/prompts.service';
 import { OpenaiService } from '../components/openai/openai.service';
+import {
+  BomberCarEmergencia,
+  BomberCarEmergenciaSchema,
+} from '../schemas/bomberCarEmergenciaSchema';
+import {
+  BomberCarTokens,
+  BomberCarTokensSchema,
+} from '../schemas/bomberCarTokensSchema';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: BomberCar.name, schema: BomberCarSchema },
+      { name: BomberCarEmergencia.name, schema: BomberCarEmergenciaSchema },
+      { name: BomberCarTokens.name, schema: BomberCarTokensSchema },
       { name: BomberCarPosition.name, schema: BomberCarPositionSchema },
       {
         name: BomberCarPositionHistory.name,
@@ -31,6 +42,7 @@ import { OpenaiService } from '../components/openai/openai.service';
     BomberCarsService,
     HashCodeService,
     PromptsService,
+    NotificacionesService,
     OpenaiService,
   ],
 })

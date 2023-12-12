@@ -20,6 +20,9 @@ export class BomberCar {
   @Prop({ required: false })
   token: string;
 
+  @Prop({ required: false })
+  status: string;
+
   @Prop({ required: true })
   createdAt: Date;
 }
