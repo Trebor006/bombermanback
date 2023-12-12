@@ -59,14 +59,18 @@ export class BomberCarController {
 
   @Get('current-position')
   async currentPosition(@Query('bomberCarId') bomberCarId: string) {
+    console.log('current-position ' + bomberCarId);
+
     const bombercarhistory =
       await this.bomberCarsService.currentPosition(bomberCarId);
 
     return bombercarhistory;
   }
 
-  @Get('register-token')
+  @Post('register-token')
   async bindToken(@Body() bindTokenBombercarDto: BindTokenBombercarDto) {
+    console.log('bindToken ' + JSON.stringify(bindTokenBombercarDto));
+
     return await this.bomberCarsService.bindToken(bindTokenBombercarDto);
   }
 }
