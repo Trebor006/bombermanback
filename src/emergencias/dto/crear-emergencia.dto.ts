@@ -2,6 +2,7 @@ import { ComentarioDto } from '../../common/dto/comentario-dto';
 
 export class CrearEmergenciaDto {
   hash: string;
+  token: string;
   correo: string;
 
   titulo: string;

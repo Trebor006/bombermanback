@@ -199,6 +199,7 @@ export class EmergenciasService {
 
     const nuevaEmergenciaDto: CrearEmergenciaDto = new CrearEmergenciaDto();
     nuevaEmergenciaDto.hash = hash;
+    nuevaEmergenciaDto.token = createEmergenciaDto.token;
     nuevaEmergenciaDto.correo = createEmergenciaDto.usuario;
     nuevaEmergenciaDto.titulo = createEmergenciaDto.titulo;
     nuevaEmergenciaDto.descripcion = createEmergenciaDto.descripcion;
@@ -476,15 +477,22 @@ export class EmergenciasService {
     if (tokens.length > 0) {
       this.notificacionesService.sendNotification(
         tokens,
-        'La emergencia ha sido asignada a un equipo',
-        'Emergencia asignada a un equipo, revisa los datos actualizados' +
-          '....',
+        'Nueva Emergencia',
+        'Proceder al destino' + '....',
         '',
         id,
         '',
       );
     }
 
+    this.notificacionesService.sendNotification(
+      [emergencia.token],
+      'Emergencia asignada a un equipo, revisa los datos actualizados',
+      'Emergencia asignada a un equipo, revisa los datos actualizados' + '....',
+      '',
+      id,
+      '',
+    );
     console.log(JSON.stringify(emergencia));
 
     await bomberCarEmergenciaSaved.save();
