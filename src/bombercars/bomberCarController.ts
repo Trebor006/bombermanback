@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { BomberCarsService } from './bomberCars.service';
 import { CreateBombercarDto } from './dto/create-bombercar.dto';
 import { UpdateBombercarPositionDto } from './dto/update-bombercar-position.dto';
-import { AssignBomberCarDto } from './dto/assign-bombercar.dto';
 import { BindTokenBombercarDto } from './dto/bind-token-bombercar.dto';
+import { BombercarEmergencySolvedDto } from './dto/bombercar-emergency-solved.dto';
 
 @Controller('bombercars')
 export class BomberCarController {
@@ -72,5 +72,19 @@ export class BomberCarController {
     console.log('bindToken ' + JSON.stringify(bindTokenBombercarDto));
 
     return await this.bomberCarsService.bindToken(bindTokenBombercarDto);
+  }
+
+  @Get('revisar-asignacion')
+  revisarEmergenciaAsignada(@Query('bomberCarId') bomberCarId: string) {
+    return this.bomberCarsService.revisarAsignacion(bomberCarId);
+  }
+
+  @Post('emergencia-solucionada')
+  emergenciaSolucionada(
+    @Body() bombercarEmergencySolvedDto: BombercarEmergencySolvedDto,
+  ) {
+    return this.bomberCarsService.emergenciaSolucionada(
+      bombercarEmergencySolvedDto.bomberCarId,
+    );
   }
 }

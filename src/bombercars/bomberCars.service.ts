@@ -232,4 +232,63 @@ export class BomberCarsService {
 
     return newBomberCarTokenSaved;
   }
+
+  async revisarAsignacion(bomberCarId: string) {
+    const bomberCarSaved = await this.bomberCarModel
+      .findOne({
+        id: bomberCarId,
+      })
+      .exec();
+
+    if (bomberCarSaved.status === 'BUSY') {
+      const bomberCarEmergenciaSaved = await this.bomberCarEmergenciaModel
+        .findOne({
+          bomberCarId: bomberCarId,
+        })
+        .sort({ createdAt: -1 })
+        .exec();
+
+      const emergenciaSaved = await this.emergenciaModel
+        .findOne({ id: bomberCarEmergenciaSaved.emergenciaId })
+        .exec();
+
+      return {
+        asignado: true,
+        emergenciaId: bomberCarEmergenciaSaved.emergenciaId,
+        lon: emergenciaSaved.lon,
+        lat: emergenciaSaved.lat,
+      };
+    } else {
+      return {
+        asignado: false,
+      };
+    }
+  }
+
+  async emergenciaSolucionada(bomberCarId: string) {
+    const bomberCarSaved = await this.bomberCarModel
+      .findOne({
+        id: bomberCarId,
+      })
+      .exec();
+
+    if (bomberCarSaved.status === 'BUSY') {
+      const bomberCarEmergenciaSaved = await this.bomberCarEmergenciaModel
+        .findOne({
+          bomberCarId: bomberCarId,
+        })
+        .sort({ createdAt: -1 })
+        .exec();
+
+      const emergenciaSaved = await this.emergenciaModel
+        .findOne({ id: bomberCarEmergenciaSaved.emergenciaId })
+        .exec();
+
+      emergenciaSaved.estado = 'PROCESADA';
+      emergenciaSaved.save();
+    }
+
+    bomberCarSaved.status = 'AVAILABLE';
+    bomberCarSaved.save();
+  }
 }
