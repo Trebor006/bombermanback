@@ -76,6 +76,8 @@ export class BomberCarController {
 
   @Get('revisar-asignacion')
   revisarEmergenciaAsignada(@Query('bomberCarId') bomberCarId: string) {
+    console.log('revisarEmergenciaAsignada ' + JSON.stringify(bomberCarId));
+
     return this.bomberCarsService.revisarAsignacion(bomberCarId);
   }
 
@@ -83,6 +85,10 @@ export class BomberCarController {
   emergenciaSolucionada(
     @Body() bombercarEmergencySolvedDto: BombercarEmergencySolvedDto,
   ) {
+    console.log(
+      'emergenciaSolucionada ' + JSON.stringify(bombercarEmergencySolvedDto),
+    );
+
     return this.bomberCarsService.emergenciaSolucionada(
       bombercarEmergencySolvedDto.bomberCarId,
     );
